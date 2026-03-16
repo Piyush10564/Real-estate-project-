@@ -22,7 +22,7 @@ function Messages() {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
+        `http://localhost:8000/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInquiries(res.data.inquiries);
@@ -37,7 +37,7 @@ function Messages() {
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm('Delete this message?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/inquiries/${id}`, {
+      await axios.delete(`http://localhost:8000/api/inquiries/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInquiries(prev => prev.filter(i => i._id !== id));
@@ -51,7 +51,7 @@ function Messages() {
   const handleMarkAsRead = async (id) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/inquiries/${id}/read`, {},
+        `http://localhost:8000/api/inquiries/${id}/read`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchInquiries();

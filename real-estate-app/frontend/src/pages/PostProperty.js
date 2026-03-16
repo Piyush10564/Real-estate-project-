@@ -63,7 +63,7 @@ function PostProperty() {
       };
 
       await axios.post(
-        'http://localhost:5000/api/properties',
+        'http://localhost:8000/api/properties',
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

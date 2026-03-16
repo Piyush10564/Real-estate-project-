@@ -32,7 +32,7 @@ function PropertyDetails() {
 
   const fetchPropertyDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/properties/${id}`);
+      const response = await axios.get(`http://localhost:8000/api/properties/${id}`);
       setProperty(response.data);
     } catch (error) {
       console.error('Error fetching property:', error);
@@ -41,7 +41,7 @@ function PropertyDetails() {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/reviews/property/${id}`);
+      const response = await axios.get(`http://localhost:8000/api/reviews/property/${id}`);
       setReviews(response.data.reviews);
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -59,7 +59,7 @@ function PropertyDetails() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/reviews',
+        'http://localhost:8000/api/reviews',
         { property: id, ...newReview },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -78,12 +78,12 @@ function PropertyDetails() {
 
     try {
       if (isFavorite) {
-        await axios.delete(`http://localhost:5000/api/favorites/${id}`, {
+        await axios.delete(`http://localhost:8000/api/favorites/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
         await axios.post(
-          'http://localhost:5000/api/favorites',
+          'http://localhost:8000/api/favorites',
           { propertyId: id },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -108,7 +108,7 @@ function PropertyDetails() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/inquiries',
+        'http://localhost:8000/api/inquiries',
         {
           sellerId: property.seller._id,
           propertyId: id,
