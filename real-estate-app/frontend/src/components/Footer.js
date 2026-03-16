@@ -22,9 +22,9 @@ function Footer() {
 
         <div className="footer-section">
           <h4>Contact Info</h4>
-          <p>Email: info@realestate.com</p>
-          <p>Phone: +1 (555) 123-4567</p>
-          <p>Address: 123 Main St, City, State 12345</p>
+          <p>Email: Aggarwals@realestate.com</p>
+          <p>Phone: +91 94651-70298</p>
+          <p>Address: #323 Gokul Niwas, Sector 22, Chandigarh</p>
         </div>
 
         <div className="footer-section">

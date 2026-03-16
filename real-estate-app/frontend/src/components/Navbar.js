@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaSearch, FaPlus, FaUser, FaHeart, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaSearch, FaPlus, FaUser, FaHeart, FaSignOutAlt, FaEnvelope } from 'react-icons/fa';
 import '../styles/Navbar.css';
 
 function Navbar() {
@@ -42,6 +42,9 @@ function Navbar() {
             <>
               <Link to="/favorites" className="nav-link">
                 <FaHeart /> Favorites
+              </Link>
+              <Link to="/messages" className="nav-link">
+                <FaEnvelope /> Messages
               </Link>
               <Link to={`/profile/${user.id}`} className="nav-link">
                 <FaUser /> Profile

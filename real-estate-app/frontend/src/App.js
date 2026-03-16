@@ -9,6 +9,7 @@ import PostProperty from './pages/PostProperty';
 import UserProfile from './pages/UserProfile';
 import MyListings from './pages/MyListings';
 import Favorites from './pages/Favorites';
+import Messages from './pages/Messages';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import './styles/App.css';
@@ -26,6 +27,7 @@ function App() {
           <Route path="/profile/:id" element={<UserProfile />} />
           <Route path="/my-listings" element={<MyListings />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>

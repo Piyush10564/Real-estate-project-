@@ -13,6 +13,11 @@ function PropertyDetails() {
   const [property, setProperty] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({
+    message: '',
+    phone: ''
+  });
   const [newReview, setNewReview] = useState({
     rating: 5,
     comment: ''
@@ -89,7 +94,39 @@ function PropertyDetails() {
     }
   };
 
-  if (loading || !property) return <div className="loading">Loading...</div>;
+  const handleSendInquiry = async (e) => {
+    e.preventDefault();
+    if (!token) {
+      alert('Please login to send inquiry');
+      return;
+    }
+
+    if (!inquiryForm.message.trim()) {
+      alert('Please enter a message');
+      return;
+    }
+
+    try {
+      await axios.post(
+        'http://localhost:5000/api/inquiries',
+        {
+          sellerId: property.seller._id,
+          propertyId: id,
+          message: inquiryForm.message,
+          buyerPhone: inquiryForm.phone
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Inquiry sent successfully!');
+      setShowInquiryModal(false);
+      setInquiryForm({ message: '', phone: '' });
+    } catch (error) {
+      console.error('Error sending inquiry:', error);
+      alert('Failed to send inquiry. Please try again.');
+    }
+  };
+
+  if (loading || !property) return <div className="loading">Loading property details...</div>;
 
   const imageUrl = property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/600x400';
 
@@ -149,6 +186,51 @@ function PropertyDetails() {
               </ul>
             </div>
           )}
+
+          <section className="reviews-section">
+            <h2>Reviews & Ratings</h2>
+
+            {token && (
+              <div className="add-review">
+                <h3>Leave a Review</h3>
+                <form onSubmit={handleAddReview}>
+                  <div className="form-group">
+                    <label>Rating</label>
+                    <div style={{ paddingTop: '8px' }}>
+                      <StarRatings
+                        rating={newReview.rating}
+                        starRatedColor="#ffc107"
+                        numberOfStars={5}
+                        starDimension="28px"
+                        starSpacing="4px"
+                        changeRating={(rating) => setNewReview(prev => ({ ...prev, rating }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Comment</label>
+                    <textarea
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                      placeholder="Share your experience..."
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="submit-btn">Submit Review</button>
+                </form>
+              </div>
+            )}
+
+            <div className="reviews-list">
+              {reviews.length > 0 ? (
+                reviews.map(review => (
+                  <ReviewCard key={review._id} review={review} />
+                ))
+              ) : (
+                <p>No reviews yet. Be the first to review!</p>
+              )}
+            </div>
+          </section>
         </div>
 
         <div className="sidebar">
@@ -167,52 +249,51 @@ function PropertyDetails() {
                 </p>
               </div>
             </div>
-            <button className="contact-btn">Contact Seller</button>
+            <button className="contact-btn" onClick={() => setShowInquiryModal(true)}>Contact Seller</button>
           </div>
         </div>
       </div>
 
-      <section className="reviews-section">
-        <h2>Reviews & Ratings</h2>
-
-        {token && (
-          <div className="add-review">
-            <h3>Leave a Review</h3>
-            <form onSubmit={handleAddReview}>
+      {/* Inquiry Modal */}
+      {showInquiryModal && (
+        <div className="modal-overlay" onClick={() => setShowInquiryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Express Interest in Property</h2>
+              <button className="close-btn" onClick={() => setShowInquiryModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleSendInquiry} className="inquiry-form">
               <div className="form-group">
-                <label>Rating</label>
-                <StarRatings
-                  rating={newReview.rating}
-                  starRatedColor="#ffc107"
-                  numberOfStars={5}
-                  name="rating"
-                  changeRating={(rating) => setNewReview(prev => ({ ...prev, rating }))}
-                />
-              </div>
-              <div className="form-group">
-                <label>Comment</label>
+                <label>Your Message</label>
                 <textarea
-                  value={newReview.comment}
-                  onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                  placeholder="Share your experience..."
+                  value={inquiryForm.message}
+                  onChange={(e) => setInquiryForm(prev => ({ ...prev, message: e.target.value }))}
+                  placeholder="Tell the seller why you're interested in this property..."
+                  rows="5"
                   required
                 />
               </div>
-              <button type="submit" className="submit-btn">Submit Review</button>
+              <div className="form-group">
+                <label>Your Contact Phone (Optional)</label>
+                <input
+                  type="tel"
+                  value={inquiryForm.phone}
+                  onChange={(e) => setInquiryForm(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Your phone number"
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowInquiryModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="submit-btn">
+                  Send Inquiry
+                </button>
+              </div>
             </form>
           </div>
-        )}
-
-        <div className="reviews-list">
-          {reviews.length > 0 ? (
-            reviews.map(review => (
-              <ReviewCard key={review._id} review={review} />
-            ))
-          ) : (
-            <p>No reviews yet. Be the first to review!</p>
-          )}
         </div>
-      </section>
+      )}
     </div>
   );
 }

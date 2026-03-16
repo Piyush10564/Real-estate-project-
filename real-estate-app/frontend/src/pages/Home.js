@@ -8,6 +8,7 @@ import '../styles/Home.css';
 function Home() {
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [listingType, setListingType] = useState('buy'); // 'buy' or 'rent'
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
     city: '',
@@ -77,55 +78,70 @@ function Home() {
   return (
     <div className="home">
       {/* Hero Section */}
-      <section className="hero" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80)'}}>
-        <div className="hero-overlay"></div>
+      <section className="hero" style={{backgroundImage: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)'}}>
         <div className="hero-content">
-          <h1>Find Your Dream Property</h1>
-          <p>Discover thousands of premium properties in your favorite locations</p>
+          <div className="hero-left">
+            <span className="hero-label">REAL ESTATE</span>
+            <h1>Discover Your Future: Find The Perfect Property</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec commoda, felis sed elementum ultricies, tortor urna molestie metus, vitae accumsan sem ante quis urna.</p>
+            
+            <button className="explore-btn" onClick={() => navigate('/search')}>
+              Explore Now <FaArrowRight />
+            </button>
 
-          <form className="search-form" onSubmit={handleSearch}>
-            <div className="form-group">
-              <input
-                type="text"
-                name="city"
-                placeholder="City"
-                value={filters.city}
-                onChange={handleFilterChange}
-              />
-            </div>
-            <div className="form-group">
-              <select
-                name="propertyType"
-                value={filters.propertyType}
-                onChange={handleFilterChange}
+            <div className="search-tabs">
+              <button 
+                className={`tab-btn ${listingType === 'buy' ? 'active' : ''}`}
+                onClick={() => setListingType('buy')}
               >
-                <option value="">All Types</option>
-                <option value="apartment">Apartment</option>
-                <option value="house">House</option>
-                <option value="villa">Villa</option>
-                <option value="commercial">Commercial</option>
-              </select>
+                Buy
+              </button>
+              <button 
+                className={`tab-btn ${listingType === 'rent' ? 'active' : ''}`}
+                onClick={() => setListingType('rent')}
+              >
+                Rent
+              </button>
             </div>
-            <div className="form-group">
-              <input
-                type="number"
-                name="minPrice"
-                placeholder="Min Price"
-                value={filters.minPrice}
-                onChange={handleFilterChange}
-              />
-            </div>
-            <div className="form-group">
-              <input
-                type="number"
-                name="maxPrice"
-                placeholder="Max Price"
-                value={filters.maxPrice}
-                onChange={handleFilterChange}
-              />
-            </div>
-            <button type="submit" className="search-btn">Search Now</button>
-          </form>
+
+            <form className="search-form" onSubmit={handleSearch}>
+              <div className="search-field">
+                <label>Location</label>
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="Paseo del Mar, Malaga, Spain"
+                  value={filters.city}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <div className="search-field">
+                <label>Pricing</label>
+                <input
+                  type="text"
+                  placeholder="$15000 - $65000"
+                  value={filters.minPrice && filters.maxPrice ? `$${filters.minPrice} - $${filters.maxPrice}` : ''}
+                  onChange={(e) => {
+                    const match = e.target.value.match(/\$?([\d,]+)\s*-\s*\$?([\d,]+)?/);
+                    if (match) {
+                      setFilters(prev => ({
+                        ...prev,
+                        minPrice: match[1].replace(/,/g, ''),
+                        maxPrice: match[2]?.replace(/,/g, '') || ''
+                      }));
+                    }
+                  }}
+                />
+              </div>
+              <button type="submit" className="search-icon-btn">
+                <FaArrowRight />
+              </button>
+            </form>
+          </div>
+
+          <div className="hero-right">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Luxury Property" className="property-image" />
+          </div>
         </div>
       </section>
 

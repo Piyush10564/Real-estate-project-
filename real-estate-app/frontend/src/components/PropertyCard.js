@@ -7,10 +7,10 @@ import '../styles/PropertyCard.css';
 function PropertyCard({ property }) {
   // Real property images from web sources
   const sampleImages = [
-    'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/1682519/pexels-photo-1682519.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-    'https://images.pexels.com/photos/1587014/pexels-photo-1587014.jpeg?auto=compress&cs=tinysrgb&w=600',
+    'https://images.homify.com/v1526467193/p/photo/image/2560934/VILLA_OMAXE.jpg',
+    'https://images.pexels.com/photos/1682519/pexels-photo-https://www.omaxe.com/projectgallery/gallery_1670581359955.jpg1682519.jpeg?auto=compress&cs=tinysrgb&w=600',
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcSsqaONwiYd-BrTTd0-Ed7g0SEaWMz28nnA&s',
+    'https://is1-2.housingcdn.com/4f2250e8/16bb6c782c4d993573b091fbde4f4072/v0/fs/omaxe_the_empire-sector_59_sahibzada_ajit_singh_nagar-chandigarh-omaxe_ltd.jpeg',
     'https://images.pexels.com/photos/1458384/pexels-photo-1458384.jpeg?auto=compress&cs=tinysrgb&w=600',
     'https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg?auto=compress&cs=tinysrgb&w=600',
     'https://images.pexels.com/photos/1889600/pexels-photo-1889600.jpeg?auto=compress&cs=tinysrgb&w=600',

@@ -14,15 +14,15 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #1a1a1a;
-  background-color: #ffffff;
+  color: #e0e0e0;
+  background-color: #0a0a0a;
   line-height: 1.6;
 }
 
 .main-content {
   min-height: calc(100vh - 180px);
   padding: 40px 0;
-  background: #ffffff;
+  background: #0a0a0a;
 }
 
 button, input, select, textarea {
