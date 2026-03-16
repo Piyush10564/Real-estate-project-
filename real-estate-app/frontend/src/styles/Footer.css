@@ -1,8 +1,9 @@
 .footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   color: white;
   padding: 60px 20px 20px;
   margin-top: 80px;
+  border-top: 1px solid #333;
 }
 
 .footer-content {
@@ -24,7 +25,7 @@
 
 .footer-section p {
   color: #b0b0b0;
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 10px;
   line-height: 1.8;
   font-weight: 400;
@@ -47,7 +48,7 @@
 }
 
 .footer-section a:hover {
-  color: #667eea;
+  color: #b8860b;
   padding-left: 5px;
 }
 
@@ -61,17 +62,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(102, 126, 234, 0.1);
+  width: 70px;
+  height: 55px;
+  background: rgba(184, 134, 11, 0.1);
   border-radius: 50%;
-  color: #667eea;
+  color: #b8860b;
   transition: all 0.3s;
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(184, 134, 11, 0.3);
 }
 
 .social-links a:hover {
-  background: #667eea;
+  background: #b8860b;
   color: white;
   transform: translateY(-3px);
 }
@@ -91,7 +92,7 @@
   }
 
   .footer-content {
-    gap: 30px;
+    gap: 20px;
   }
 
   .footer-section h4 {
