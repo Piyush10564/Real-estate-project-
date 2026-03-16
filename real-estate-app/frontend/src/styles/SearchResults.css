@@ -9,27 +9,27 @@
 }
 
 .filters-sidebar {
-  background: white;
+  background: #1a1a1a;
   padding: 28px;
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
   height: fit-content;
   position: sticky;
   top: 100px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #333;
 }
 
 .filters-sidebar h3 {
   margin-bottom: 25px;
   font-size: 20px;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 700;
 }
 
 .filter-group {
   margin-bottom: 25px;
   padding-bottom: 25px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #333;
 }
 
 .filter-group:last-child {
@@ -42,7 +42,7 @@
   display: block;
   margin-bottom: 10px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #e0e0e0;
   font-size: 13px;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -52,24 +52,25 @@
 .filter-group select {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid #333;
   border-radius: 8px;
   font-size: 14px;
-  background: #fafafa;
+  background: #0f0f0f;
   transition: all 0.3s;
   margin-bottom: 8px;
+  color: #e0e0e0;
 }
 
 .filter-group input::placeholder {
-  color: #999;
+  color: #666;
 }
 
 .filter-group input:focus,
 .filter-group select:focus {
   outline: none;
   border-color: #667eea;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: #1a1a1a;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 .reset-btn {
@@ -96,7 +97,7 @@
 .results-container h2 {
   margin-bottom: 30px;
   font-size: 28px;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 800;
 }
 
