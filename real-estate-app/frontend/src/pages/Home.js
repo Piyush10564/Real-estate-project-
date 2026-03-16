@@ -23,7 +23,7 @@ function Home() {
 
   const fetchFeaturedProperties = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/properties', {
+      const response = await axios.get('http://localhost:8000/api/properties', {
         params: { limit: 6 }
       });
       setFeaturedProperties(response.data.properties);

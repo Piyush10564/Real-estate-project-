@@ -7,6 +7,7 @@
 .favorites h1 {
   font-size: 28px;
   margin-bottom: 30px;
+  color: #ffffff;
 }
 
 .favorites-grid {
@@ -40,14 +41,15 @@
 .no-favorites {
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: #1a1a1a;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  border: 1px solid #333;
 }
 
 .no-favorites p {
   font-size: 18px;
-  color: #666;
+  color: #b0b0b0;
   margin-bottom: 20px;
 }
 

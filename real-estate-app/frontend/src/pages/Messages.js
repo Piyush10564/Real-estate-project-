@@ -1,223 +1,255 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaUser, FaHome, FaClock, FaTrash } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaEnvelope, FaHome, FaClock, FaTrash, FaMapMarkerAlt, FaInbox, FaPaperPlane } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/Messages.css';
 
 function Messages() {
   const [inquiries, setInquiries] = useState([]);
-  const [activeTab, setActiveTab] = useState('received'); // 'sent', 'received', 'all'
+  const [activeTab, setActiveTab] = useState('received');
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) { navigate('/login'); return; }
     fetchInquiries();
   }, [activeTab, token]);
 
   const fetchInquiries = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `http://localhost:5000/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      const res = await axios.get(
+        `http://localhost:8000/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setInquiries(response.data.inquiries);
+      setInquiries(res.data.inquiries);
       setSelectedInquiry(null);
-    } catch (error) {
-      console.error('Error fetching inquiries:', error);
+    } catch (err) {
+      console.error('Error fetching inquiries:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteInquiry = async (id) => {
-    if (window.confirm('Are you sure you want to delete this inquiry?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/inquiries/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setInquiries(inquiries.filter(inquiry => inquiry._id !== id));
-        setSelectedInquiry(null);
-        alert('Inquiry deleted successfully');
-      } catch (error) {
-        console.error('Error deleting inquiry:', error);
-        alert('Failed to delete inquiry');
-      }
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      await axios.delete(`http://localhost:8000/api/inquiries/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setInquiries(prev => prev.filter(i => i._id !== id));
+      setSelectedInquiry(null);
+    } catch (err) {
+      console.error('Error deleting inquiry:', err);
+      alert('Failed to delete message.');
     }
   };
 
   const handleMarkAsRead = async (id) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/inquiries/${id}/read`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        `http://localhost:8000/api/inquiries/${id}/read`, {},
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchInquiries();
-    } catch (error) {
-      console.error('Error marking as read:', error);
+    } catch (err) {
+      console.error('Error marking as read:', err);
     }
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString('en-IN', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
-  };
+
+  const unreadCount = inquiries.filter(i => !i.isRead).length;
 
   return (
-    <div className="messages-container">
-      <div className="messages-header">
-        <h1>My Messages</h1>
-        <p>Track all your property inquiries and messages</p>
-      </div>
+    <div className="messages-page">
+      <div className="messages-container">
 
-      <div className="messages-content">
+        {/* ── HEADER ── */}
+        <div className="messages-header">
+          <div className="messages-header-left">
+            <h1>
+              <FaEnvelope />
+              My Messages
+              {unreadCount > 0 && (
+                <span className="msg-count-badge">{unreadCount}</span>
+              )}
+            </h1>
+            <p>Track all your property inquiries and conversations</p>
+          </div>
+        </div>
+
+        {/* ── TABS ── */}
         <div className="tabs">
-          <button 
-            className={`tab ${activeTab === 'received' ? 'active' : ''}`}
-            onClick={() => setActiveTab('received')}
-          >
-            <FaEnvelope /> Received
+          <button className={`tab ${activeTab === 'received' ? 'active' : ''}`} onClick={() => setActiveTab('received')}>
+            <FaInbox /> Received
           </button>
-          <button 
-            className={`tab ${activeTab === 'sent' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sent')}
-          >
-            <FaEnvelope /> Sent
+          <button className={`tab ${activeTab === 'sent' ? 'active' : ''}`} onClick={() => setActiveTab('sent')}>
+            <FaPaperPlane /> Sent
           </button>
-          <button 
-            className={`tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
+          <button className={`tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
             <FaEnvelope /> All
           </button>
         </div>
 
+        {/* ── MAIN GRID ── */}
         <div className="messages-main">
+
+          {/* LEFT: inquiry list */}
           <div className="inquiries-list">
+            <div className="inquiries-list-header">
+              <span>{activeTab.toUpperCase()} MESSAGES</span>
+              <span>{inquiries.length} messages</span>
+            </div>
+
             {loading ? (
-              <div className="loading">Loading messages...</div>
+              <div className="loading">
+                <div className="loading-spinner" />
+                Loading messages...
+              </div>
             ) : inquiries.length === 0 ? (
               <div className="empty-state">
-                <FaEnvelope />
+                <div className="empty-state-icon">📭</div>
                 <h3>No {activeTab !== 'all' ? activeTab : ''} messages</h3>
-                <p>You don't have any {activeTab === 'sent' ? 'inquiries sent' : activeTab === 'received' ? 'inquiries received' : 'messages'} yet.</p>
+                <p>Your {activeTab === 'sent' ? 'sent inquiries' : activeTab === 'received' ? 'received messages' : 'messages'} will appear here.</p>
               </div>
             ) : (
               inquiries.map(inquiry => (
-                <div 
+                <div
                   key={inquiry._id}
                   className={`inquiry-item ${selectedInquiry?._id === inquiry._id ? 'active' : ''} ${!inquiry.isRead && activeTab === 'received' ? 'unread' : ''}`}
                   onClick={() => {
                     setSelectedInquiry(inquiry);
-                    if (!inquiry.isRead && activeTab === 'received') {
-                      handleMarkAsRead(inquiry._id);
-                    }
+                    if (!inquiry.isRead && activeTab === 'received') handleMarkAsRead(inquiry._id);
                   }}
                 >
                   <div className="inquiry-avatar">
-                    <img 
-                      src={activeTab === 'sent' ? inquiry.seller?.profileImage : inquiry.buyer?.profileImage || 'https://via.placeholder.com/50'} 
-                      alt="User" 
+                    <img
+                      src={
+                        activeTab === 'sent'
+                          ? inquiry.seller?.profileImage
+                          : inquiry.buyer?.profileImage
+                            || `https://ui-avatars.com/api/?name=${encodeURIComponent((activeTab === 'sent' ? inquiry.seller?.firstName : inquiry.buyer?.firstName) || 'U')}&background=222&color=b8860b`
+                      }
+                      alt="User"
+                      onError={e => { e.target.src = `https://ui-avatars.com/api/?name=U&background=222&color=b8860b`; }}
                     />
-                    {!inquiry.isRead && activeTab === 'received' && <span className="unread-badge"></span>}
+                    {!inquiry.isRead && activeTab === 'received' && <span className="unread-badge" />}
                   </div>
                   <div className="inquiry-preview">
                     <div className="inquiry-top">
                       <h4>
-                        {activeTab === 'sent' 
-                          ? `${inquiry.seller?.firstName} ${inquiry.seller?.lastName}` 
-                          : `${inquiry.buyer?.firstName} ${inquiry.buyer?.lastName}`}
+                        {activeTab === 'sent'
+                          ? `${inquiry.seller?.firstName || ''} ${inquiry.seller?.lastName || ''}`
+                          : `${inquiry.buyer?.firstName || ''} ${inquiry.buyer?.lastName || ''}`}
                       </h4>
-                      <span className="inquiry-date">{formatDate(inquiry.createdAt)}</span>
+                      {!inquiry.isRead && activeTab === 'received' && (
+                        <span className="unread-label">New</span>
+                      )}
                     </div>
                     <p className="inquiry-property">
-                      <FaHome /> {inquiry.property?.title}
+                      <FaHome /> {inquiry.property?.title || 'Property'}
                     </p>
-                    <p className="inquiry-text">{inquiry.message.substring(0, 80)}...</p>
+                    <p className="inquiry-text">{inquiry.message}</p>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                      <span className="inquiry-date">{formatDate(inquiry.createdAt)}</span>
+                    </div>
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          {selectedInquiry && (
+          {/* RIGHT: detail panel */}
+          {selectedInquiry ? (
             <div className="inquiry-detail">
               <div className="detail-header">
                 <h2>Message Details</h2>
-                <button 
-                  className="close-detail"
-                  onClick={() => setSelectedInquiry(null)}
-                >
-                  ×
-                </button>
+                <button className="close-detail" onClick={() => setSelectedInquiry(null)}>✕</button>
               </div>
 
               <div className="detail-content">
+                {/* Sender info */}
                 <div className="detail-user">
-                  <img 
-                    src={activeTab === 'sent' ? selectedInquiry.seller?.profileImage : selectedInquiry.buyer?.profileImage || 'https://via.placeholder.com/80'} 
-                    alt="User" 
+                  <img
+                    src={
+                      activeTab === 'sent'
+                        ? selectedInquiry.seller?.profileImage
+                        : selectedInquiry.buyer?.profileImage
+                          || `https://ui-avatars.com/api/?name=${encodeURIComponent((activeTab === 'sent' ? selectedInquiry.seller?.firstName : selectedInquiry.buyer?.firstName) || 'U')}&background=222&color=b8860b`
+                    }
+                    alt="User"
+                    onError={e => { e.target.src = `https://ui-avatars.com/api/?name=U&background=222&color=b8860b`; }}
                   />
-                  <div>
+                  <div className="detail-user-info">
                     <h3>
-                      {activeTab === 'sent' 
-                        ? `${selectedInquiry.seller?.firstName} ${selectedInquiry.seller?.lastName}` 
+                      {activeTab === 'sent'
+                        ? `${selectedInquiry.seller?.firstName} ${selectedInquiry.seller?.lastName}`
                         : `${selectedInquiry.buyer?.firstName} ${selectedInquiry.buyer?.lastName}`}
                     </h3>
                     <p className="contact-info">
                       📧 {activeTab === 'sent' ? selectedInquiry.seller?.email : selectedInquiry.buyer?.email}
                     </p>
                     <p className="contact-info">
-                      📱 {activeTab === 'sent' ? selectedInquiry.seller?.phone : (selectedInquiry.buyerContact?.phone || selectedInquiry.buyer?.phone || 'Not provided')}
+                      📱 {activeTab === 'sent'
+                        ? selectedInquiry.seller?.phone || 'Not provided'
+                        : selectedInquiry.buyerContact?.phone || selectedInquiry.buyer?.phone || 'Not provided'}
                     </p>
                   </div>
                 </div>
 
+                {/* Property */}
                 <div className="detail-property">
-                  <h4>Property</h4>
+                  <h4><FaHome /> Property</h4>
                   <div className="property-info">
                     <h5>{selectedInquiry.property?.title}</h5>
-                    <p>{formatPriceINR(selectedInquiry.property?.price)}</p>
-                    <p>{selectedInquiry.property?.address}, {selectedInquiry.property?.city}</p>
+                    <p className="prop-price">{formatPriceINR(selectedInquiry.property?.price)}</p>
+                    <p className="prop-addr">
+                      <FaMapMarkerAlt /> {selectedInquiry.property?.address}, {selectedInquiry.property?.city}
+                    </p>
+                    <Link to={`/property/${selectedInquiry.property?._id}`} className="view-property-link">
+                      🏠 View Property →
+                    </Link>
                   </div>
                 </div>
 
+                {/* Message */}
                 <div className="detail-message">
                   <h4>Message</h4>
-                  <p>{selectedInquiry.message}</p>
+                  <p className="msg-bubble">{selectedInquiry.message}</p>
                   <p className="message-date">
-                    <FaClock /> Sent {formatDate(selectedInquiry.createdAt)}
+                    <FaClock /> {formatDate(selectedInquiry.createdAt)}
                   </p>
                 </div>
 
+                {/* Actions */}
                 <div className="detail-actions">
-                  <button 
+                  <button
                     className="delete-btn"
                     onClick={() => handleDeleteInquiry(selectedInquiry._id)}
                   >
-                    <FaTrash /> Delete
+                    <FaTrash /> Delete Message
                   </button>
                 </div>
               </div>
             </div>
+          ) : (
+            /* Placeholder when nothing is selected */
+            <div className="inquiry-detail">
+              <div className="detail-placeholder">
+                <div className="detail-placeholder-icon">💬</div>
+                <p>Select a message to view details</p>
+              </div>
+            </div>
           )}
+
         </div>
       </div>
     </div>
