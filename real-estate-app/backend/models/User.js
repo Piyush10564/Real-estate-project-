@@ -2,14 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true
-  },
-  lastName: {
-    type: String,
-    required: true
-  },
+  firstName: { type: String, required: true },
+  lastName:  { type: String, required: true },
   email: {
     type: String,
     required: true,
@@ -18,43 +12,36 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: false   // optional — OAuth users have no password
   },
-  phone: String,
+  googleId:     { type: String, sparse: true },
+  authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
+  phone:        String,
   profileImage: String,
   userType: {
     type: String,
     enum: ['buyer', 'seller', 'agent'],
     default: 'buyer'
   },
-  bio: String,
-  company: String,
+  bio:      String,
+  company:  String,
   location: String,
-  verified: {
-    type: Boolean,
-    default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  verified: { type: Boolean, default: false },
+  createdAt:{ type: Date, default: Date.now }
 });
 
-// Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
