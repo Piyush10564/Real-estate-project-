@@ -123,10 +123,26 @@
 }
 
 .logout-btn {
-  background: none;
-  color: #1a1a1a;
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
   text-decoration: none;
-  border: none;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 6px;
+  padding: 7px 14px !important;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(220, 38, 38, 0.35);
+  color: #ff4444;
+  border-color: #dc2626;
+  border-bottom-color: #dc2626;
 }
 
 @media (max-width: 768px) {
