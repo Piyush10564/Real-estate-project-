@@ -21,7 +21,7 @@ function MyListings() {
 
   const fetchMyListings = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/properties?limit=100', {
+      const response = await axios.get('http://localhost:8000/api/properties?limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const myProperties = response.data.properties.filter(p => p.seller._id === user.id || p.seller === user.id);
@@ -37,7 +37,7 @@ function MyListings() {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
         await axios.delete(
-          `http://localhost:5000/api/properties/${propertyId}`,
+          `http://localhost:8000/api/properties/${propertyId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProperties(properties.filter(p => p._id !== propertyId));
