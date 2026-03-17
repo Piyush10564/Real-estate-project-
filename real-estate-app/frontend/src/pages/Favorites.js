@@ -20,7 +20,7 @@ function Favorites() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/favorites', {
+      const response = await axios.get('http://localhost:8000/api/favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(response.data);
@@ -34,7 +34,7 @@ function Favorites() {
   const handleRemoveFavorite = async (propertyId) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/favorites/${propertyId}`,
+        `http://localhost:8000/api/favorites/${propertyId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFavorites(favorites.filter(f => f.property._id !== propertyId));

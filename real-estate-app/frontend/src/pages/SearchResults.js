@@ -21,7 +21,7 @@ function SearchResults() {
         ...filters,
         limit: 20
       };
-      const response = await axios.get('http://localhost:5000/api/properties', { params });
+      const response = await axios.get('http://localhost:8000/api/properties', { params });
       setProperties(response.data.properties);
     } catch (error) {
       console.error('Error fetching properties:', error);
