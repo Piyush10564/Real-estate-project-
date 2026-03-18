@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
 import axios from 'axios';
@@ -8,27 +8,65 @@ function SearchResults() {
   const location = useLocation();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState(location.state?.filters || {});
 
-  useEffect(() => {
-    fetchSearchResults();
-  }, [filters]);
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-  const fetchSearchResults = async () => {
+  const normalizeFilters = (rawFilters) => {
+    const clean = {};
+
+    Object.entries(rawFilters || {}).forEach(([key, value]) => {
+      if (value === null || value === undefined) return;
+
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return;
+
+        if (['minPrice', 'maxPrice', 'bedrooms', 'bathrooms'].includes(key)) {
+          const num = parseInt(trimmed, 10);
+          if (!Number.isNaN(num)) clean[key] = num;
+          return;
+        }
+
+        clean[key] = trimmed;
+        return;
+      }
+
+      clean[key] = value;
+    });
+
+    return clean;
+  };
+
+  const fetchSearchResults = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const params = {
-        ...filters,
+        ...normalizeFilters(filters),
         limit: 20
       };
-      const response = await axios.get('http://localhost:8000/api/properties', { params });
-      setProperties(response.data.properties);
+      const response = await axios.get(`${API_BASE_URL}/api/properties`, { params });
+
+      if (Array.isArray(response.data?.properties)) {
+        setProperties(response.data.properties);
+      } else {
+        setProperties([]);
+        setError('Unexpected response from server.');
+      }
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setProperties([]);
+      setError('Unable to load properties. Please make sure backend is running on port 8000.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, API_BASE_URL]);
+
+  useEffect(() => {
+    fetchSearchResults();
+  }, [fetchSearchResults]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -118,6 +156,8 @@ function SearchResults() {
         <h2>Search Results</h2>
         {loading ? (
           <p>Loading properties...</p>
+        ) : error ? (
+          <p className="error-message">{error}</p>
         ) : properties.length > 0 ? (
           <div className="properties-grid">
             {properties.map(property => (

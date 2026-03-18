@@ -18,23 +18,58 @@ router.get('/', async (req, res) => {
     } = req.query;
 
     let filter = { listingStatus: 'available' };
+    const parsedPage = Math.max(parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(parseInt(limit, 10) || 10, 1);
 
-    if (city) filter.city = city;
-    if (propertyType) filter.propertyType = propertyType;
-    if (bedrooms) filter.bedrooms = parseInt(bedrooms);
-    if (bathrooms) filter.bathrooms = parseInt(bathrooms);
-    
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseInt(minPrice);
-      if (maxPrice) filter.price.$lte = parseInt(maxPrice);
+    if (city && city.trim()) {
+      filter.city = { $regex: city.trim(), $options: 'i' };
     }
 
-    const skip = (page - 1) * limit;
+    if (propertyType && propertyType.trim()) {
+      filter.propertyType = propertyType.trim();
+    }
+
+    if (bedrooms !== undefined && bedrooms !== null && bedrooms !== '') {
+      const parsedBedrooms = parseInt(bedrooms, 10);
+      if (!Number.isNaN(parsedBedrooms)) {
+        filter.bedrooms = parsedBedrooms;
+      }
+    }
+
+    if (bathrooms !== undefined && bathrooms !== null && bathrooms !== '') {
+      const parsedBathrooms = parseInt(bathrooms, 10);
+      if (!Number.isNaN(parsedBathrooms)) {
+        filter.bathrooms = parsedBathrooms;
+      }
+    }
+    
+    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
+      filter.price = {};
+
+      if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
+        const parsedMinPrice = parseInt(minPrice, 10);
+        if (!Number.isNaN(parsedMinPrice)) {
+          filter.price.$gte = parsedMinPrice;
+        }
+      }
+
+      if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
+        const parsedMaxPrice = parseInt(maxPrice, 10);
+        if (!Number.isNaN(parsedMaxPrice)) {
+          filter.price.$lte = parsedMaxPrice;
+        }
+      }
+
+      if (!Object.keys(filter.price).length) {
+        delete filter.price;
+      }
+    }
+
+    const skip = (parsedPage - 1) * parsedLimit;
     const properties = await Property.find(filter)
       .populate('seller', 'firstName lastName email phone profileImage')
       .skip(skip)
-      .limit(parseInt(limit))
+      .limit(parsedLimit)
       .sort({ createdAt: -1 });
 
     const total = await Property.countDocuments(filter);
@@ -42,8 +77,8 @@ router.get('/', async (req, res) => {
     res.json({
       properties,
       total,
-      pages: Math.ceil(total / limit),
-      currentPage: page
+      pages: Math.ceil(total / parsedLimit),
+      currentPage: parsedPage
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,174 +1,140 @@
 .navbar {
-  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
-  color: #e0e0e0;
-  padding: 12px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 1px solid #333;
+  backdrop-filter: blur(8px);
+  background: rgba(251, 248, 243, 0.94);
+  border-bottom: 1px solid var(--line);
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 14px 22px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 18px;
 }
 
 .nav-logo {
-  font-size: 22px;
-  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  white-space: nowrap;
-  letter-spacing: -0.5px;
-  color: #b8860b;
-  transition: all 0.3s;
+  gap: 9px;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
 }
 
-.nav-logo:hover {
-  color: #d4a017;
+.nav-logo svg {
+  color: var(--brand);
 }
 
 .nav-menu {
   display: flex;
-  gap: 30px;
   align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
-  flex: 1;
+  justify-content: flex-end;
 }
 
 .nav-search {
   display: flex;
   align-items: center;
-  background: rgba(40, 40, 40, 0.8);
-  border-radius: 8px;
-  padding: 10px 16px;
-  gap: 12px;
-  min-width: 250px;
-  border: 1px solid #333;
-  transition: all 0.3s;
+  gap: 10px;
+  min-width: 260px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
 }
 
-.nav-search:hover,
 .nav-search:focus-within {
-  background: rgba(50, 50, 50, 0.9);
-  border-color: #b8860b;
-  box-shadow: 0 0 12px rgba(184, 134, 11, 0.2);
+  border-color: #ccb39a;
+  box-shadow: 0 0 0 4px rgba(207, 173, 141, 0.18);
 }
 
 .nav-search input {
   border: none;
   background: transparent;
-  color: #e0e0e0;
   outline: none;
   width: 100%;
-  font-size: 14px;
-  font-weight: 400;
+  color: var(--text);
+  font-size: 13px;
 }
 
 .nav-search input::placeholder {
-  color: #666;
+  color: #9a9185;
 }
 
 .search-icon {
-  cursor: pointer;
-  font-size: 16px;
-  opacity: 0.6;
-  color: #b8860b;
+  color: #8f8577;
+  font-size: 14px;
 }
 
 .nav-link {
-  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  color: #5f574c;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #b0b0b0;
-  text-decoration: none;
-  transition: all 0.3s;
-  background: none;
-  padding: 8px 0;
-  font-weight: 500;
-  font-size: 14px;
+  gap: 7px;
+  padding: 8px 4px;
   border-bottom: 2px solid transparent;
 }
 
 .nav-link:hover {
-  color: #b8860b;
-  border-bottom-color: #b8860b;
+  color: var(--ink);
+  border-bottom-color: #cbb296;
 }
 
 .nav-button {
-  background: #000;
+  background: var(--ink);
   color: #fff;
-  padding: 10px 22px;
-  border-radius: 6px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s;
-  border: none;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-  box-shadow: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
 }
 
 .nav-button:hover {
-  background: #333;
-  transform: none;
+  background: #272420;
+  transform: translateY(-1px);
 }
 
 .logout-btn {
-  background: rgba(220, 38, 38, 0.15);
-  color: #f87171;
-  text-decoration: none;
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  border-radius: 6px;
-  padding: 7px 14px !important;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.3s;
+  border: 1px solid #dcbcb5;
+  color: #95463a;
+  padding: 8px 12px !important;
+  border-radius: 999px;
+  background: #fff;
 }
 
 .logout-btn:hover {
-  background: rgba(220, 38, 38, 0.35);
-  color: #ff4444;
-  border-color: #dc2626;
-  border-bottom-color: #dc2626;
+  background: #fff4f2;
+  border-color: #d7a39a;
+  color: #7f352a;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   .nav-container {
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
   }
 
   .nav-menu {
-    width: 100%;
+    justify-content: center;
     gap: 12px;
-    order: 2;
   }
 
   .nav-search {
     width: 100%;
-    min-width: auto;
-    order: 3;
-  }
-
-  .nav-button, .nav-link {
-    font-size: 14px;
+    min-width: 0;
+    order: 2;
   }
 
   .nav-logo {
-    font-size: 22px;
-    order: 1;
+    justify-content: center;
   }
 }

@@ -13,8 +13,19 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
 
 const corsOptions = {
   origin(origin, callback) {
-    // Allow non-browser clients and local frontend origins from env.
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow non-browser clients.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // Allow configured origins from env.
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // In development, allow localhost/127.0.0.1 on any port.
+    const isLocalDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    if (process.env.NODE_ENV !== 'production' && isLocalDevOrigin) {
       return callback(null, true);
     }
 
