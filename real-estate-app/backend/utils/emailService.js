@@ -17,17 +17,58 @@ const mockTransporter = {
   }
 };
 
+let cachedTransporter = null;
+
+const getEmailPassword = () => {
+  // Gmail app passwords are sometimes copied with spaces; normalize it.
+  return (process.env.EMAIL_PASSWORD || '').replace(/\s+/g, '').trim();
+};
+
+const getSenderEmail = () => {
+  const from = (process.env.EMAIL_FROM || '').trim();
+  if (!from || from.includes('your_email@gmail.com')) {
+    return process.env.EMAIL_USER;
+  }
+  return from;
+};
+
+const hasEmailConfig = () => {
+  return Boolean(process.env.EMAIL_USER && getEmailPassword());
+};
+
 // Get transporter
 const getTransporter = async () => {
-  return mockTransporter;
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+
+  if (!hasEmailConfig()) {
+    console.warn('Email config missing. Using mock transporter (emails will not be sent).');
+    cachedTransporter = mockTransporter;
+    return cachedTransporter;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: getEmailPassword(),
+    },
+  });
+
+  await transporter.verify();
+  console.log('Email transporter is ready.');
+  cachedTransporter = transporter;
+  return cachedTransporter;
 };
+
 const sendPasswordResetEmail = async (email, resetToken) => {
   try {
     const mailTransporter = await getTransporter();
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      from: getSenderEmail(),
       to: email,
       subject: 'Password Reset Request - Aggarwal Properties',
       html: `
@@ -82,7 +123,7 @@ const sendWelcomeEmail = async (email, firstName) => {
   try {
     const mailTransporter = await getTransporter();
     const mailOptions = {
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      from: getSenderEmail(),
       to: email,
       subject: 'Welcome to Aggarwal Properties! 🎉',
       html: `
@@ -145,10 +186,11 @@ const sendWelcomeEmail = async (email, firstName) => {
     };
 
     await mailTransporter.sendMail(mailOptions);
+    console.log(`Welcome email sent to ${email}`);
     return { success: true };
   } catch (error) {
     console.error('Email sending error:', error);
-    return { success: false };
+    return { success: false, error: error.message };
   }
 };
 
