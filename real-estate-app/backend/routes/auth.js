@@ -28,7 +28,10 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send welcome email
-    await sendWelcomeEmail(email, firstName);
+    const welcomeResult = await sendWelcomeEmail(email, firstName);
+    if (!welcomeResult.success) {
+      console.warn(`Welcome email failed for ${email}: ${welcomeResult.error || 'Unknown error'}`);
+    }
 
     // Create JWT token
     const token = jwt.sign(

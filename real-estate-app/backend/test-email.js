@@ -6,12 +6,13 @@ async function testGmail() {
     console.log('Testing Gmail with Nodemailer...\n');
     console.log('EMAIL_USER:', process.env.EMAIL_USER);
     console.log('EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? '***hidden***' : 'NOT SET');
+    const appPassword = (process.env.EMAIL_PASSWORD || '').replace(/\s+/g, '').trim();
     
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+        pass: appPassword
       }
     });
 
