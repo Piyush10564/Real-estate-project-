@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema({
   company:  String,
   location: String,
   verified: { type: Boolean, default: false },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   createdAt:{ type: Date, default: Date.now }
 });
 

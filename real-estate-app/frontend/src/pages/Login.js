@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Auth.css';
 
@@ -63,13 +63,17 @@ function Login() {
             />
           </div>
 
+          <div className="forgot-password-link">
+            <Link to="/forgot-password">Forgot Password?</Link>
+          </div>
+
           <button type="submit" disabled={loading} className="submit-btn">
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         <p className="auth-link">
-          Don't have an account? <a href="/register">Register here</a>
+          Don't have an account? <Link to="/register">Register here</Link>
         </p>
       </div>
     </div>
