@@ -45,6 +45,14 @@
   margin-bottom: 30px;
 }
 
+.auth-subtitle {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -131,14 +139,14 @@
 }
 
 .auth-link a {
-  color: #000;
+  color: #667eea;
   font-weight: 700;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .auth-link a:hover {
-  color: #666;
+  color: #764ba2;
 }
 
 .error-message {
@@ -151,6 +159,36 @@
   font-weight: 500;
   font-size: 13px;
   box-shadow: 0 2px 8px rgba(211, 47, 47, 0.1);
+}
+
+.success-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 3px solid #4caf50;
+  font-weight: 500;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin: -10px 0 20px 0;
+}
+
+.forgot-password-link a {
+  color: #667eea;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.3s;
+  font-weight: 500;
+}
+
+.forgot-password-link a:hover {
+  color: #764ba2;
+  text-decoration: underline;
 }
 
 @media (max-width: 480px) {
