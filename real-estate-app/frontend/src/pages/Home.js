@@ -85,17 +85,21 @@ function Home() {
   return (
     <div className="home">
       {/* Hero Section */}
-      <section className="hero">
+      <section 
+        className="hero"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="hero-overlay"></div>
         <div className="hero-content">
           <div className="hero-left">
             <span className="hero-label">REAL ESTATE</span>
-            <h1>Discover Your Future: Find The Perfect Property</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec commoda, felis sed elementum ultricies, tortor urna molestie metus, vitae accumsan sem ante quis urna.</p>
+            <h1>Finding Your New Home Is Simple</h1>
+            <p>We provide high-quality rental listings to help you find the perfect home</p>
             
-            <button className="explore-btn" onClick={() => navigate('/search')}>
-              Explore Now <FaArrowRight />
-            </button>
-
             <div className="search-tabs">
               <button 
                 className={`tab-btn ${listingType === 'buy' ? 'active' : ''}`}
@@ -113,20 +117,35 @@ function Home() {
 
             <form className="search-form" onSubmit={handleSearch}>
               <div className="search-field">
-                <label>Location</label>
+                <label>City/Street</label>
                 <input
                   type="text"
                   name="city"
-                  placeholder="Paseo del Mar, Malaga, Spain"
+                  placeholder="City Street"
                   value={filters.city}
                   onChange={handleFilterChange}
                 />
               </div>
               <div className="search-field">
-                <label>Pricing</label>
+                <label>Typology of rent</label>
+                <select
+                  name="propertyType"
+                  value={filters.propertyType}
+                  onChange={handleFilterChange}
+                  className="search-select"
+                >
+                  <option value="">Select Type</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
+                  <option value="villa">Villa</option>
+                  <option value="condo">Condo</option>
+                </select>
+              </div>
+              <div className="search-field">
+                <label>Price</label>
                 <input
                   type="text"
-                  placeholder="$15000 - $65000"
+                  placeholder="Price range"
                   value={filters.minPrice && filters.maxPrice ? `$${filters.minPrice} - $${filters.maxPrice}` : ''}
                   onChange={(e) => {
                     const match = e.target.value.match(/\$?([\d,]+)\s*-\s*\$?([\d,]+)?/);
@@ -140,14 +159,10 @@ function Home() {
                   }}
                 />
               </div>
-              <button type="submit" className="search-icon-btn">
-                <FaArrowRight />
+              <button type="submit" className="search-btn">
+                Search
               </button>
             </form>
-          </div>
-
-          <div className="hero-right">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Luxury Property" className="hero-property-image" />
           </div>
         </div>
       </section>
