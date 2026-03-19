@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import PropertyCard from '../components/PropertyCard';
 import ReviewCard from '../components/ReviewCard';
 import StarRatings from 'react-star-ratings';
-import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaHeart, FaShare, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHeart, FaShare, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/PropertyDetails.css';
 
@@ -25,21 +24,16 @@ function PropertyDetails() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    fetchPropertyDetails();
-    fetchReviews();
-  }, [id]);
-
-  const fetchPropertyDetails = async () => {
+  const fetchPropertyDetails = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:8000/api/properties/${id}`);
       setProperty(response.data);
     } catch (error) {
       console.error('Error fetching property:', error);
     }
-  };
+  }, [id]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:8000/api/reviews/property/${id}`);
       setReviews(response.data.reviews);
@@ -48,7 +42,12 @@ function PropertyDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchPropertyDetails();
+    fetchReviews();
+  }, [fetchPropertyDetails, fetchReviews]);
 
   const handleAddReview = async (e) => {
     e.preventDefault();

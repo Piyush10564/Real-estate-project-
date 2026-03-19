@@ -7,9 +7,14 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, userType } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+
+    if (!firstName || !lastName || !normalizedEmail || !password) {
+      return res.status(400).json({ message: 'Please fill all required fields' });
+    }
 
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -18,7 +23,7 @@ router.post('/register', async (req, res) => {
     const user = new User({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password,
       userType: userType || 'buyer'
     });
@@ -44,6 +49,9 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
     res.status(500).json({ message: error.message });
   }
 });
@@ -52,9 +60,14 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

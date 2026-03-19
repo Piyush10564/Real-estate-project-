@@ -8,6 +8,7 @@ router.get('/', async (req, res) => {
   try {
     const { 
       city, 
+      location,
       minPrice, 
       maxPrice, 
       propertyType, 
@@ -19,15 +20,40 @@ router.get('/', async (req, res) => {
 
     let filter = { listingStatus: 'available' };
 
-    if (city) filter.city = city;
+    const safeTextRegex = (value) => {
+      const escaped = String(value).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(escaped, 'i');
+    };
+
+    const locationInput = (location || city || '').trim();
+    if (locationInput) {
+      const locationRegex = safeTextRegex(locationInput);
+      filter.$or = [
+        { city: locationRegex },
+        { state: locationRegex },
+        { address: locationRegex }
+      ];
+    }
+
     if (propertyType) filter.propertyType = propertyType;
-    if (bedrooms) filter.bedrooms = parseInt(bedrooms);
-    if (bathrooms) filter.bathrooms = parseInt(bathrooms);
+
+    const parsedBedrooms = Number.parseInt(bedrooms, 10);
+    if (!Number.isNaN(parsedBedrooms)) filter.bedrooms = parsedBedrooms;
+
+    const parsedBathrooms = Number.parseInt(bathrooms, 10);
+    if (!Number.isNaN(parsedBathrooms)) filter.bathrooms = parsedBathrooms;
     
     if (minPrice || maxPrice) {
       filter.price = {};
-      if (minPrice) filter.price.$gte = parseInt(minPrice);
-      if (maxPrice) filter.price.$lte = parseInt(maxPrice);
+      const parsedMinPrice = Number.parseInt(minPrice, 10);
+      const parsedMaxPrice = Number.parseInt(maxPrice, 10);
+
+      if (!Number.isNaN(parsedMinPrice)) filter.price.$gte = parsedMinPrice;
+      if (!Number.isNaN(parsedMaxPrice)) filter.price.$lte = parsedMaxPrice;
+
+      if (Object.keys(filter.price).length === 0) {
+        delete filter.price;
+      }
     }
 
     const skip = (page - 1) * limit;

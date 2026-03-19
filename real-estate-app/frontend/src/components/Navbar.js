@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaSearch, FaPlus, FaUser, FaHeart, FaSignOutAlt, FaEnvelope } from 'react-icons/fa';
 import '../styles/Navbar.css';
 
 function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');

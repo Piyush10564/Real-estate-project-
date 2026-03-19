@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
 import axios from 'axios';
@@ -10,17 +10,18 @@ function SearchResults() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(location.state?.filters || {});
 
-  useEffect(() => {
-    fetchSearchResults();
-  }, [filters]);
-
-  const fetchSearchResults = async () => {
+  const fetchSearchResults = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
         ...filters,
+        location: (filters.city || '').trim(),
         limit: 20
       };
+
+      if (!params.city) delete params.city;
+      if (!params.location) delete params.location;
+
       const response = await axios.get('http://localhost:8000/api/properties', { params });
       setProperties(response.data.properties);
     } catch (error) {
@@ -28,7 +29,11 @@ function SearchResults() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchSearchResults();
+  }, [fetchSearchResults]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

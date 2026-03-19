@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaHeart, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/UserProfile.css';
 
@@ -76,19 +76,19 @@ function UserProfile() {
   const [selectedInquiry, setSelectedInquiry] = useState(null);
 
   /* ── fetch profile ── */
-  useEffect(() => { fetchUserProfile(); }, [id]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       const res = await axios.get(`http://localhost:8000/api/users/${id}`);
       setUser(res.data);
       setFormData(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  };
+  }, [id]);
+
+  useEffect(() => { fetchUserProfile(); }, [fetchUserProfile]);
 
   /* ── fetch favorites ── */
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!token) { navigate('/login'); return; }
     setFavLoading(true);
     try {
@@ -98,7 +98,7 @@ function UserProfile() {
       setFavorites(res.data);
     } catch (e) { console.error(e); }
     finally { setFavLoading(false); }
-  };
+  }, [navigate, token]);
 
   const handleRemoveFavorite = async (propertyId) => {
     try {
@@ -110,7 +110,7 @@ function UserProfile() {
   };
 
   /* ── fetch messages ── */
-  const fetchInquiries = async () => {
+  const fetchInquiries = useCallback(async () => {
     if (!token) { navigate('/login'); return; }
     setMsgLoading(true);
     try {
@@ -122,7 +122,7 @@ function UserProfile() {
       setSelectedInquiry(null);
     } catch (e) { console.error(e); }
     finally { setMsgLoading(false); }
-  };
+  }, [msgTab, navigate, token]);
 
   const handleDeleteInquiry = async (inquiryId) => {
     if (!window.confirm('Delete this message?')) return;
@@ -153,7 +153,7 @@ function UserProfile() {
 
   useEffect(() => {
     if (activeTab === 'messages') fetchInquiries();
-  }, [msgTab]);
+  }, [activeTab, fetchInquiries]);
 
   /* ── profile update ── */
   const handleChange = (e) => {
