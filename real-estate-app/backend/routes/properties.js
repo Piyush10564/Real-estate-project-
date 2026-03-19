@@ -8,6 +8,7 @@ router.get('/', async (req, res) => {
   try {
     const { 
       city, 
+      location,
       minPrice, 
       maxPrice, 
       propertyType, 
@@ -18,58 +19,48 @@ router.get('/', async (req, res) => {
     } = req.query;
 
     let filter = { listingStatus: 'available' };
-    const parsedPage = Math.max(parseInt(page, 10) || 1, 1);
-    const parsedLimit = Math.max(parseInt(limit, 10) || 10, 1);
 
-    if (city && city.trim()) {
-      filter.city = { $regex: city.trim(), $options: 'i' };
+    const safeTextRegex = (value) => {
+      const escaped = String(value).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(escaped, 'i');
+    };
+
+    const locationInput = (location || city || '').trim();
+    if (locationInput) {
+      const locationRegex = safeTextRegex(locationInput);
+      filter.$or = [
+        { city: locationRegex },
+        { state: locationRegex },
+        { address: locationRegex }
+      ];
     }
 
-    if (propertyType && propertyType.trim()) {
-      filter.propertyType = propertyType.trim();
-    }
+    if (propertyType) filter.propertyType = propertyType;
 
-    if (bedrooms !== undefined && bedrooms !== null && bedrooms !== '') {
-      const parsedBedrooms = parseInt(bedrooms, 10);
-      if (!Number.isNaN(parsedBedrooms)) {
-        filter.bedrooms = parsedBedrooms;
-      }
-    }
+    const parsedBedrooms = Number.parseInt(bedrooms, 10);
+    if (!Number.isNaN(parsedBedrooms)) filter.bedrooms = parsedBedrooms;
 
-    if (bathrooms !== undefined && bathrooms !== null && bathrooms !== '') {
-      const parsedBathrooms = parseInt(bathrooms, 10);
-      if (!Number.isNaN(parsedBathrooms)) {
-        filter.bathrooms = parsedBathrooms;
-      }
-    }
+    const parsedBathrooms = Number.parseInt(bathrooms, 10);
+    if (!Number.isNaN(parsedBathrooms)) filter.bathrooms = parsedBathrooms;
     
-    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
+    if (minPrice || maxPrice) {
       filter.price = {};
+      const parsedMinPrice = Number.parseInt(minPrice, 10);
+      const parsedMaxPrice = Number.parseInt(maxPrice, 10);
 
-      if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
-        const parsedMinPrice = parseInt(minPrice, 10);
-        if (!Number.isNaN(parsedMinPrice)) {
-          filter.price.$gte = parsedMinPrice;
-        }
-      }
+      if (!Number.isNaN(parsedMinPrice)) filter.price.$gte = parsedMinPrice;
+      if (!Number.isNaN(parsedMaxPrice)) filter.price.$lte = parsedMaxPrice;
 
-      if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
-        const parsedMaxPrice = parseInt(maxPrice, 10);
-        if (!Number.isNaN(parsedMaxPrice)) {
-          filter.price.$lte = parsedMaxPrice;
-        }
-      }
-
-      if (!Object.keys(filter.price).length) {
+      if (Object.keys(filter.price).length === 0) {
         delete filter.price;
       }
     }
 
-    const skip = (parsedPage - 1) * parsedLimit;
+    const skip = (page - 1) * limit;
     const properties = await Property.find(filter)
       .populate('seller', 'firstName lastName email phone profileImage')
       .skip(skip)
-      .limit(parsedLimit)
+      .limit(parseInt(limit))
       .sort({ createdAt: -1 });
 
     const total = await Property.countDocuments(filter);
@@ -77,8 +68,8 @@ router.get('/', async (req, res) => {
     res.json({
       properties,
       total,
-      pages: Math.ceil(total / parsedLimit),
-      currentPage: parsedPage
+      pages: Math.ceil(total / limit),
+      currentPage: page
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

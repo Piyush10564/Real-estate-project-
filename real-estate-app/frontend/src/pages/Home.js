@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaHome, FaCheck, FaStar, FaArrowRight } from 'react-icons/fa';
+import { FaStar, FaArrowRight } from 'react-icons/fa';
 import PropertyCard from '../components/PropertyCard';
 import axios from 'axios';
 import '../styles/Home.css';
@@ -36,7 +36,14 @@ function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate('/search', { state: { filters } });
+    navigate('/search', {
+      state: {
+        filters: {
+          ...filters,
+          city: (filters.city || '').trim()
+        }
+      }
+    });
   };
 
   const handleFilterChange = (e) => {
@@ -78,7 +85,7 @@ function Home() {
   return (
     <div className="home">
       {/* Hero Section */}
-      <section className="hero" style={{backgroundImage: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)'}}>
+      <section className="hero">
         <div className="hero-content">
           <div className="hero-left">
             <span className="hero-label">REAL ESTATE</span>
@@ -140,7 +147,7 @@ function Home() {
           </div>
 
           <div className="hero-right">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Luxury Property" className="property-image" />
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" alt="Luxury Property" className="hero-property-image" />
           </div>
         </div>
       </section>
