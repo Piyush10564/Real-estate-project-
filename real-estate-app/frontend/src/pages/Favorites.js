@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PropertyCard from '../components/PropertyCard';
@@ -10,15 +10,7 @@ function Favorites() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchFavorites();
-  }, [token, navigate]);
-
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/favorites', {
         headers: { Authorization: `Bearer ${token}` }
@@ -29,7 +21,15 @@ function Favorites() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    fetchFavorites();
+  }, [token, navigate, fetchFavorites]);
 
   const handleRemoveFavorite = async (propertyId) => {
     try {
@@ -37,7 +37,7 @@ function Favorites() {
         `http://localhost:8000/api/favorites/${propertyId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setFavorites(favorites.filter(f => f.property._id !== propertyId));
+      setFavorites(prev => prev.filter(f => f.property._id !== propertyId));
       alert('Removed from favorites');
     } catch (error) {
       console.error('Error removing favorite:', error);

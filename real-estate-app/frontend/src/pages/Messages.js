@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaHome, FaClock, FaTrash, FaMapMarkerAlt, FaInbox, FaPaperPlane } from 'react-icons/fa';
@@ -13,12 +13,7 @@ function Messages() {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) { navigate('/login'); return; }
-    fetchInquiries();
-  }, [activeTab, token]);
-
-  const fetchInquiries = async () => {
+  const fetchInquiries = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(
@@ -32,7 +27,12 @@ function Messages() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, token]);
+
+  useEffect(() => {
+    if (!token) { navigate('/login'); return; }
+    fetchInquiries();
+  }, [fetchInquiries, navigate, token]);
 
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm('Delete this message?')) return;

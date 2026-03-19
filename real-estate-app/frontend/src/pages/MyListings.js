@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PropertyCard from '../components/PropertyCard';
@@ -11,15 +11,7 @@ function MyListings() {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchMyListings();
-  }, [token, navigate]);
-
-  const fetchMyListings = async () => {
+  const fetchMyListings = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/properties?limit=100', {
         headers: { Authorization: `Bearer ${token}` }
@@ -31,7 +23,15 @@ function MyListings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, user.id]);
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    fetchMyListings();
+  }, [token, navigate, fetchMyListings]);
 
   const handleDelete = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
@@ -40,7 +40,7 @@ function MyListings() {
           `http://localhost:8000/api/properties/${propertyId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setProperties(properties.filter(p => p._id !== propertyId));
+        setProperties(prev => prev.filter(p => p._id !== propertyId));
         alert('Property deleted successfully');
       } catch (error) {
         console.error('Error deleting property:', error);

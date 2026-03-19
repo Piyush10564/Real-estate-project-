@@ -1,23 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700;800&display=swap');
 
 :root {
-  --bg: #f4f0ea;
-  --bg-elevated: #fbf8f3;
-  --panel: #ffffff;
-  --panel-muted: #f8f5ef;
-  --text: #1f1d1a;
-  --text-soft: #6f685e;
-  --line: #dbd2c5;
-  --brand: #c67f44;
-  --brand-strong: #ae6831;
-  --ink: #11100f;
-  --danger: #b93d2d;
-  --success: #2e6b45;
-  --shadow-soft: 0 14px 38px rgba(51, 41, 29, 0.09);
-  --shadow-deep: 0 28px 54px rgba(51, 41, 29, 0.15);
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --bg: #f3f1ee;
+  --bg-soft: #ece9e3;
+  --paper: #ffffff;
+  --text: #1f1b18;
+  --muted: #6f655c;
+  --line: #d9d1c8;
+  --accent: #bc8a57;
+  --accent-2: #8d643d;
+  --shadow: 0 20px 55px rgba(52, 33, 18, 0.08);
 }
 
 * {
@@ -32,13 +24,14 @@ html {
 
 body {
   font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   color: var(--text);
   background:
-    radial-gradient(circle at 10% 0%, #ebe1d3 0%, rgba(235, 225, 211, 0) 35%),
-    radial-gradient(circle at 100% 100%, #e7dccd 0%, rgba(231, 220, 205, 0) 42%),
-    var(--bg);
-  line-height: 1.65;
-  min-height: 100vh;
+    radial-gradient(circle at 12% 12%, rgba(188, 138, 87, 0.14), transparent 32%),
+    radial-gradient(circle at 88% 84%, rgba(141, 100, 61, 0.12), transparent 36%),
+    linear-gradient(180deg, #f7f5f2 0%, #f0ece6 100%);
+  line-height: 1.6;
 }
 
 h1,
@@ -47,14 +40,13 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Cormorant Garamond', serif;
-  letter-spacing: 0.2px;
-  color: var(--ink);
+  font-family: 'Playfair Display', serif;
+  letter-spacing: -0.02em;
 }
 
 .main-content {
-  min-height: calc(100vh - 210px);
-  padding: 36px 0 22px;
+  min-height: calc(100vh - 180px);
+  padding: 22px 0 40px;
 }
 
 button,
@@ -68,7 +60,7 @@ textarea {
 button {
   cursor: pointer;
   border: none;
-  transition: all 0.25s ease;
+  transition: all 0.24s ease;
 }
 
 a {
@@ -77,75 +69,65 @@ a {
 }
 
 .container {
-  max-width: 1220px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 22px;
+  padding: 0 24px;
 }
 
 .loading {
   text-align: center;
-  padding: 52px 24px;
-  color: var(--text-soft);
-  font-weight: 600;
+  padding: 64px 24px;
+  font-size: 17px;
+  color: var(--muted);
 }
 
 .error {
-  color: var(--danger);
+  color: #b73737;
   text-align: center;
-  padding: 48px 22px;
-  font-weight: 600;
+  padding: 64px 24px;
+  font-size: 17px;
 }
 
 .error-message,
 .success-message {
-  border-radius: var(--radius-sm);
   padding: 12px 14px;
-  margin-bottom: 16px;
+  border-radius: 10px;
+  margin-bottom: 14px;
   font-weight: 600;
-  font-size: 13px;
 }
 
 .error-message {
-  border: 1px solid #efc0ba;
-  background: #fff2f0;
-  color: #8b2f24;
+  background: #fff2f2;
+  border: 1px solid #efcccc;
+  color: #9f2828;
 }
 
 .success-message {
-  border: 1px solid #bfe0cb;
-  background: #effaf3;
-  color: var(--success);
+  background: #effaf2;
+  border: 1px solid #c9ebd2;
+  color: #226533;
 }
 
 ::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f0e9de;
+  background: #e7dfd6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c6b8a4;
+  background: #bca188;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b6a58d;
+  background: #a58567;
 }
 
-::selection {
-  background: #ebd5c3;
-  color: #2f2215;
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding-top: 24px;
-  }
-
-  .container {
-    padding: 0 16px;
-  }
+::selection,
+::-moz-selection {
+  background: #dbc1a8;
+  color: #2b2119;
 }
