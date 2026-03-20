@@ -70,6 +70,39 @@ const sellers = [
     company: 'Chandigarh Premium Homes',
     bio: 'Your trusted real estate partner',
     location: 'Chandigarh'
+  },
+  {
+    firstName: 'Vikram',
+    lastName: 'Singh',
+    email: 'vikram.patiala@example.com',
+    password: 'password123',
+    phone: '+91-9876543214',
+    userType: 'agent',
+    company: 'Patiala Estate Services',
+    bio: 'Expert in Patiala & Punjab properties',
+    location: 'Patiala'
+  },
+  {
+    firstName: 'Simran',
+    lastName: 'Kaur',
+    email: 'simran.mohali@example.com',
+    password: 'password123',
+    phone: '+91-9876543215',
+    userType: 'agent',
+    company: 'Mohali Tech Realty',
+    bio: 'Specializing in Mohali IT corridor properties',
+    location: 'Mohali'
+  },
+  {
+    firstName: 'Harpreet',
+    lastName: 'Singh',
+    email: 'harpreet.punj@example.com',
+    password: 'password123',
+    phone: '+91-9876543216',
+    userType: 'agent',
+    company: 'Punjab Properties Hub',
+    bio: 'Pan-Punjab real estate specialist',
+    location: 'Zirakpur'
   }
 ];
 
@@ -250,6 +283,102 @@ const sampleProperties = [
     images: [propertyImages[4], propertyImages[2]],
     amenities: ['Garden', 'Parking', 'Maid Room', 'Security'],
     listingStatus: 'available'
+  },
+  {
+    title: 'Luxurious 4BHK Villa in Patiala',
+    description: 'Stunning independent villa with modern architecture, expansive garden, and premium finishes. Prime location in Patiala with excellent connectivity.',
+    price: 7500000,
+    propertyType: 'villa',
+    bedrooms: 4,
+    bathrooms: 3,
+    area: 2400,
+    address: 'Adarsh Nagar, Patiala',
+    city: 'Patiala',
+    state: 'Punjab',
+    zipCode: '147001',
+    images: [propertyImages[5], propertyImages[6]],
+    amenities: ['Private Garden', 'Parking', 'Maid Room', 'Security Gate', 'Lawn'],
+    listingStatus: 'available'
+  },
+  {
+    title: 'Modern 3BHK Apartment in Mohali IT Hub',
+    description: 'Contemporary 3-bedroom apartment in Sector 67 near IT park. Perfect for IT professionals with excellent connectivity and modern amenities.',
+    price: 6800000,
+    propertyType: 'apartment',
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1450,
+    address: 'Sector 67, Mohali',
+    city: 'Mohali',
+    state: 'Punjab',
+    zipCode: '160062',
+    images: [propertyImages[7], propertyImages[0]],
+    amenities: ['Gym', 'Swimming Pool', 'Security', 'Parking', 'Internet Ready'],
+    listingStatus: 'available'
+  },
+  {
+    title: 'Affordable 2BHK Home in Sangrur',
+    description: 'Well-designed 2-bedroom apartment in city center. Budget-friendly option with essential amenities and good transportation links.',
+    price: 3500000,
+    propertyType: 'apartment',
+    bedrooms: 2,
+    bathrooms: 1,
+    area: 850,
+    address: 'City Center, Sangrur',
+    city: 'Sangrur',
+    state: 'Punjab',
+    zipCode: '148001',
+    images: [propertyImages[1]],
+    amenities: ['Parking', 'Water Supply', 'Security', 'Market Nearby'],
+    listingStatus: 'available'
+  },
+  {
+    title: 'Premium 3BHK Flat in Zirakpur',
+    description: 'Spacious 3-bedroom apartment in a gated high-rise community. Located near shopping complex and restaurant hub with world-class amenities.',
+    price: 6200000,
+    propertyType: 'apartment',
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1300,
+    address: 'VIP Road, Zirakpur',
+    city: 'Zirakpur',
+    state: 'Punjab',
+    zipCode: '160104',
+    images: [propertyImages[2], propertyImages[3]],
+    amenities: ['Swimming Pool', 'Gym', 'Community Center', 'Parking', 'Security'],
+    listingStatus: 'available'
+  },
+  {
+    title: 'Independent House in Panchkula',
+    description: 'Elegant 4-bedroom independent house with scenic views. Located in peaceful residential area with lush green surroundings.',
+    price: 9500000,
+    propertyType: 'house',
+    bedrooms: 4,
+    bathrooms: 3,
+    area: 2200,
+    address: 'Sector 12, Panchkula',
+    city: 'Panchkula',
+    state: 'Haryana',
+    zipCode: '134112',
+    images: [propertyImages[4], propertyImages[8]],
+    amenities: ['Large Garden', 'Parking', 'Security System', 'Maid Room'],
+    listingStatus: 'available'
+  },
+  {
+    title: 'Compact 1BHK Studio in Mohali',
+    description: 'Cozy 1-bedroom studio apartment perfect for bachelor or young couples. Located near market with easy access to public transportation.',
+    price: 2800000,
+    propertyType: 'apartment',
+    bedrooms: 1,
+    bathrooms: 1,
+    area: 500,
+    address: 'Sector 47, Mohali',
+    city: 'Mohali',
+    state: 'Punjab',
+    zipCode: '160047',
+    images: [propertyImages[9]],
+    amenities: ['Parking', 'Security', 'Water Supply'],
+    listingStatus: 'available'
   }
 ];
 
@@ -263,8 +392,8 @@ async function seedDatabase() {
 
     // Clear existing data
     await User.deleteMany({ userType: { $in: ['seller', 'agent'] } });
-    await Property.deleteMany({ city: 'Chandigarh' });
-    console.log('Cleared existing Chandigarh properties and sellers');
+    await Property.deleteMany({ city: { $in: ['Chandigarh', 'Patiala', 'Mohali', 'Sangrur', 'Zirakpur', 'Panchkula'] } });
+    console.log('Cleared existing properties and sellers');
 
     // Create sellers
     const createdSellers = await User.create(sellers);
@@ -277,7 +406,7 @@ async function seedDatabase() {
     }));
 
     const createdProperties = await Property.create(propertiesWithSellers);
-    console.log(`Created ${createdProperties.length} sample properties in Chandigarh`);
+    console.log(`Created ${createdProperties.length} sample properties across multiple cities`);
 
     console.log('\n✅ Database seeding completed successfully!');
     console.log(`Total Properties: ${createdProperties.length}`);
