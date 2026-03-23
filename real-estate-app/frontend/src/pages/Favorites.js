@@ -8,6 +8,7 @@ function Favorites() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -36,32 +37,29 @@ function Favorites() {
 
   const handleRemoveFavorite = async (propertyId) => {
     try {
+      setRemovingId(propertyId);
+      setError(null);
+      
       await axios.delete(
         `http://localhost:8000/api/favorites/${propertyId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setFavorites(prev => prev.filter(f => f.property._id !== propertyId));
+      
+      // Safely filter out the removed favorite with null checks
+      setFavorites(prev => 
+        prev.filter(f => f.property && f.property._id && f.property._id !== propertyId)
+      );
+      
       alert('Removed from favorites');
     } catch (error) {
       console.error('Error removing favorite:', error);
+      setError('Failed to remove from favorites. Please try again.');
+    } finally {
+      setRemovingId(null);
     }
   };
 
   if (loading) return <div className="loading">Loading...</div>;
-
-  if (error) {
-    return (
-      <div className="favorites">
-        <div className="container">
-          <h1>My Favorites</h1>
-          <div style={{ color: 'red', padding: '20px', textAlign: 'center' }}>
-            <p>{error}</p>
-            <button onClick={() => fetchFavorites()}>Try Again</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Filter out favorites with null/deleted properties
   const validFavorites = favorites.filter(favorite => favorite.property && favorite.property._id);
@@ -71,6 +69,13 @@ function Favorites() {
       <div className="container">
         <h1>My Favorites</h1>
 
+        {error && (
+          <div style={{ color: 'red', padding: '15px', marginBottom: '20px', backgroundColor: '#ffe6e6', borderRadius: '4px' }}>
+            <p>{error}</p>
+            <button onClick={() => setError(null)}>Dismiss</button>
+          </div>
+        )}
+
         {validFavorites.length > 0 ? (
           <div className="favorites-grid">
             {validFavorites.map(favorite => (
@@ -79,8 +84,9 @@ function Favorites() {
                 <button
                   className="remove-btn"
                   onClick={() => handleRemoveFavorite(favorite.property._id)}
+                  disabled={removingId === favorite.property._id}
                 >
-                  Remove from Favorites
+                  {removingId === favorite.property._id ? 'Removing...' : 'Remove from Favorites'}
                 </button>
               </div>
             ))}
