@@ -7,17 +7,20 @@ import '../styles/Favorites.css';
 function Favorites() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
   const fetchFavorites = useCallback(async () => {
     try {
+      setError(null);
       const response = await axios.get('http://localhost:8000/api/favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(response.data);
     } catch (error) {
       console.error('Error fetching favorites:', error);
+      setError('Failed to load favorites. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -46,14 +49,31 @@ function Favorites() {
 
   if (loading) return <div className="loading">Loading...</div>;
 
+  if (error) {
+    return (
+      <div className="favorites">
+        <div className="container">
+          <h1>My Favorites</h1>
+          <div style={{ color: 'red', padding: '20px', textAlign: 'center' }}>
+            <p>{error}</p>
+            <button onClick={() => fetchFavorites()}>Try Again</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Filter out favorites with null/deleted properties
+  const validFavorites = favorites.filter(favorite => favorite.property && favorite.property._id);
+
   return (
     <div className="favorites">
       <div className="container">
         <h1>My Favorites</h1>
 
-        {favorites.length > 0 ? (
+        {validFavorites.length > 0 ? (
           <div className="favorites-grid">
-            {favorites.map(favorite => (
+            {validFavorites.map(favorite => (
               <div key={favorite.property._id} className="favorite-item">
                 <PropertyCard property={favorite.property} />
                 <button
