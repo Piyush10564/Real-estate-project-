@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import ReviewCard from '../components/ReviewCard';
+import PropertyMap from '../components/PropertyMap';
 import StarRatings from 'react-star-ratings';
 import { FaMapMarkerAlt, FaHeart, FaShare, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
@@ -185,6 +186,11 @@ function PropertyDetails() {
               </ul>
             </div>
           )}
+
+          <div className="map-section">
+            <h3>Location on Map</h3>
+            <PropertyMap property={property} />
+          </div>
 
           <section className="reviews-section">
             <h2>Reviews & Ratings</h2>
