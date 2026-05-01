@@ -13,7 +13,7 @@ function MyListings() {
 
   const fetchMyListings = useCallback(async () => {
     try {
-      const response = await api.get('properties?limit=100', {
+      const response = await api.get('/api/properties?limit=100', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const myProperties = response.data.properties.filter(p => p.seller._id === user.id || p.seller === user.id);

@@ -6,10 +6,20 @@ const path = require('path');
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+const defaultOrigins = [
+  process.env.CORS_ORIGIN,
+  process.env.FRONTEND_URL,
+  'http://localhost:3000'
+]
+  .filter(Boolean)
+  .join(',');
+
+const allowedOrigins = defaultOrigins
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean);
+
+console.log('Allowed CORS origins:', allowedOrigins);
 
 const corsOptions = {
   origin(origin, callback) {

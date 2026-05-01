@@ -92,7 +92,7 @@ function UserProfile() {
     if (!token) { navigate('/login'); return; }
     setFavLoading(true);
     try {
-      const res = await api.get('favorites', {
+      const res = await api.get('/api/favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(res.data);
