@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReviewCard from '../components/ReviewCard';
 import PropertyMap from '../components/PropertyMap';
@@ -10,6 +10,7 @@ import '../styles/PropertyDetails.css';
 
 function PropertyDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -91,6 +92,11 @@ function PropertyDetails() {
       setIsFavorite(!isFavorite);
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
     }
   };
 

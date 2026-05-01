@@ -21,6 +21,11 @@ function Favorites() {
       setFavorites(response.data);
     } catch (error) {
       console.error('Error fetching favorites:', error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
       setError('Failed to load favorites. Please refresh the page.');
     } finally {
       setLoading(false);
@@ -53,6 +58,11 @@ function Favorites() {
       alert('Removed from favorites');
     } catch (error) {
       console.error('Error removing favorite:', error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
       setError('Failed to remove from favorites. Please try again.');
     } finally {
       setRemovingId(null);
