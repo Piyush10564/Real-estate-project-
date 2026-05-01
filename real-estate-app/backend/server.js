@@ -8,8 +8,7 @@ const app = express();
 
 const defaultOrigins = [
   process.env.CORS_ORIGIN,
-  process.env.FRONTEND_URL,
-  'http://localhost:3000'
+  process.env.FRONTEND_URL
 ]
   .filter(Boolean)
   .join(',');
@@ -20,6 +19,11 @@ const allowedOrigins = defaultOrigins
   .filter(Boolean);
 
 console.log('Allowed CORS origins:', allowedOrigins);
+
+const allowAllOrigins = allowedOrigins.length === 0;
+if (allowAllOrigins) {
+  console.warn('No FRONTEND_URL or CORS_ORIGIN configured; allowing all origins for CORS. Set one of these env vars for production safety.');
+}
 
 const corsOptions = {
   origin(origin, callback) {
@@ -36,6 +40,11 @@ const corsOptions = {
     // In development, allow localhost/127.0.0.1 on any port.
     const isLocalDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
     if (process.env.NODE_ENV !== 'production' && isLocalDevOrigin) {
+      return callback(null, true);
+    }
+
+    // Fallback for missing production config.
+    if (allowAllOrigins) {
       return callback(null, true);
     }
 
