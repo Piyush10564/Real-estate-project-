@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaHome, FaClock, FaTrash, FaMapMarkerAlt, FaInbox, FaPaperPlane } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
