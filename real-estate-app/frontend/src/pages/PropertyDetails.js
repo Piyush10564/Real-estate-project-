@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReviewCard from '../components/ReviewCard';
@@ -28,7 +28,7 @@ function PropertyDetails() {
 
   const fetchPropertyDetails = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/properties/${id}`);
+      const response = await api.get(`/api/properties/${id}`);
       setProperty(response.data);
     } catch (error) {
       console.error('Error fetching property:', error);
@@ -37,7 +37,7 @@ function PropertyDetails() {
 
   const fetchReviews = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/reviews/property/${id}`);
+      const response = await api.get(`/api/reviews/property/${id}`);
       setReviews(response.data.reviews);
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -59,8 +59,8 @@ function PropertyDetails() {
     }
 
     try {
-      await axios.post(
-        'http://localhost:8000/api/reviews',
+      await api.post(
+        '/api/reviews',
         { property: id, ...newReview },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -79,12 +79,12 @@ function PropertyDetails() {
 
     try {
       if (isFavorite) {
-        await axios.delete(`http://localhost:8000/api/favorites/${id}`, {
+        await api.delete(`/api/favorites/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post(
-          'http://localhost:8000/api/favorites',
+        await api.post(
+          '/api/favorites',
           { propertyId: id },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -113,8 +113,8 @@ function PropertyDetails() {
     }
 
     try {
-      await axios.post(
-        'http://localhost:8000/api/inquiries',
+      await api.post(
+        '/api/inquiries',
         {
           sellerId: property.seller._id,
           propertyId: id,
@@ -310,4 +310,6 @@ function PropertyDetails() {
 }
 
 export default PropertyDetails;
+
+
 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaHome, FaClock, FaTrash, FaMapMarkerAlt, FaInbox, FaPaperPlane } from 'react-icons/fa';
@@ -16,8 +16,8 @@ function Messages() {
   const fetchInquiries = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `http://localhost:8000/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
+      const res = await api.get(
+        `/api/inquiries?type=${activeTab === 'all' ? '' : activeTab}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInquiries(res.data.inquiries);
@@ -37,7 +37,7 @@ function Messages() {
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm('Delete this message?')) return;
     try {
-      await axios.delete(`http://localhost:8000/api/inquiries/${id}`, {
+      await api.delete(`/api/inquiries/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInquiries(prev => prev.filter(i => i._id !== id));
@@ -50,8 +50,8 @@ function Messages() {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await axios.patch(
-        `http://localhost:8000/api/inquiries/${id}/read`, {},
+      await api.patch(
+        `/api/inquiries/${id}/read`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchInquiries();
@@ -257,4 +257,6 @@ function Messages() {
 }
 
 export default Messages;
+
+
 

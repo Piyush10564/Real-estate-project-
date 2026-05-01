@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaMapMarkerAlt, FaBed, FaBath, FaRuler } from 'react-icons/fa';
@@ -23,8 +23,8 @@ function Favorites() {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        'https://propify-vi62.onrender.com/api/favorites',
+      const response = await api.get(
+        '/api/favorites',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -56,8 +56,8 @@ function Favorites() {
     try {
       setRemovingId(propertyId);
 
-      await axios.delete(
-        `https://propify-vi62.onrender.com/api/favorites/${propertyId}`,
+      await api.delete(
+        `/api/favorites/${propertyId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -189,3 +189,4 @@ function Favorites() {
 }
 
 export default Favorites;
+

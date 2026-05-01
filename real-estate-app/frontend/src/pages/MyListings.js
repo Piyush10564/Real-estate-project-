@@ -1,7 +1,6 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
 import PropertyCard from '../components/PropertyCard';
 import '../styles/MyListings.css';
 
@@ -37,8 +36,8 @@ function MyListings() {
   const handleDelete = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        await axios.delete(
-          `http://localhost:8000/api/properties/${propertyId}`,
+        await api.delete(
+          `/api/properties/${propertyId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProperties(prev => prev.filter(p => p._id !== propertyId));
@@ -94,4 +93,6 @@ function MyListings() {
 }
 
 export default MyListings;
+
+
 

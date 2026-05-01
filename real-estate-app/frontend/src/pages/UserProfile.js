@@ -1,7 +1,6 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import api from '../utils/api';
 import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/UserProfile.css';
@@ -79,7 +78,7 @@ function UserProfile() {
   /* ── fetch profile ── */
   const fetchUserProfile = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/users/${id}`);
+      const res = await api.get(`/api/users/${id}`);
       setUser(res.data);
       setFormData(res.data);
     } catch (e) { console.error(e); }
@@ -103,7 +102,7 @@ function UserProfile() {
 
   const handleRemoveFavorite = async (propertyId) => {
     try {
-      await axios.delete(`http://localhost:8000/api/favorites/${propertyId}`, {
+      await api.delete(`/api/favorites/${propertyId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(prev => prev.filter(f => f.property._id !== propertyId));
@@ -115,8 +114,8 @@ function UserProfile() {
     if (!token) { navigate('/login'); return; }
     setMsgLoading(true);
     try {
-      const res = await axios.get(
-        `http://localhost:8000/api/inquiries?type=${msgTab === 'all' ? '' : msgTab}`,
+      const res = await api.get(
+        `/api/inquiries?type=${msgTab === 'all' ? '' : msgTab}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInquiries(res.data.inquiries);
@@ -128,7 +127,7 @@ function UserProfile() {
   const handleDeleteInquiry = async (inquiryId) => {
     if (!window.confirm('Delete this message?')) return;
     try {
-      await axios.delete(`http://localhost:8000/api/inquiries/${inquiryId}`, {
+      await api.delete(`/api/inquiries/${inquiryId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInquiries(prev => prev.filter(i => i._id !== inquiryId));
@@ -138,7 +137,7 @@ function UserProfile() {
 
   const handleMarkAsRead = async (inquiryId) => {
     try {
-      await axios.patch(`http://localhost:8000/api/inquiries/${inquiryId}/read`, {}, {
+      await api.patch(`/api/inquiries/${inquiryId}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchInquiries();
@@ -178,7 +177,7 @@ function UserProfile() {
     e.preventDefault();
     setUploadingImage(true);
     try {
-      const res = await axios.put(`http://localhost:8000/api/users/${id}`, formData, {
+      const res = await api.put(`/api/users/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data.user);
@@ -483,4 +482,6 @@ function UserProfile() {
 }
 
 export default UserProfile;
+
+
 

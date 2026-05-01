@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../utils/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PostProperty.css';
@@ -62,8 +62,8 @@ function PostProperty() {
         area: parseInt(formData.area)
       };
 
-      await axios.post(
-        'http://localhost:8000/api/properties',
+      await api.post(
+        '/api/properties',
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -268,4 +268,6 @@ function PostProperty() {
 }
 
 export default PostProperty;
+
+
 
