@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import '../styles/PostProperty.css';
 
 function PostProperty() {
@@ -268,3 +268,4 @@ function PostProperty() {
 }
 
 export default PostProperty;
+

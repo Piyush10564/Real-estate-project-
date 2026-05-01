@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
-import axios from 'axios';
+import api from '../utils/api';
 import '../styles/SearchResults.css';
 
 function SearchResults() {
@@ -22,7 +22,7 @@ function SearchResults() {
       if (!params.city) delete params.city;
       if (!params.location) delete params.location;
 
-      const response = await axios.get('http://localhost:8000/api/properties', { params });
+      const response = await api.get('/api/properties', { params });
       setProperties(response.data.properties);
     } catch (error) {
       console.error('Error fetching properties:', error);

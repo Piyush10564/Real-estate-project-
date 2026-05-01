@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import ReviewCard from '../components/ReviewCard';
 import PropertyMap from '../components/PropertyMap';
 import StarRatings from 'react-star-ratings';
@@ -310,3 +310,4 @@ function PropertyDetails() {
 }
 
 export default PropertyDetails;
+

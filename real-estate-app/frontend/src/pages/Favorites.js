@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import PropertyCard from '../components/PropertyCard';
 import '../styles/Favorites.css';
 
@@ -15,7 +15,7 @@ function Favorites() {
   const fetchFavorites = useCallback(async () => {
     try {
       setError(null);
-      const response = await axios.get('http://localhost:8000/api/favorites', {
+      const response = await api.get('favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(response.data);
@@ -115,3 +115,4 @@ function Favorites() {
 }
 
 export default Favorites;
+

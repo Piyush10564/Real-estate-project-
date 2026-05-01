@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaStar, FaArrowRight } from 'react-icons/fa';
 import PropertyCard from '../components/PropertyCard';
-import axios from 'axios';
+import api from '../utils/api';
 import '../styles/Home.css';
 
 function Home() {
@@ -23,7 +23,7 @@ function Home() {
 
   const fetchFeaturedProperties = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/properties', {
+      const response = await api.get('/api/properties', {
         params: { limit: 6 }
       });
       setFeaturedProperties(response.data.properties);

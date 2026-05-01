@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/UserProfile.css';
@@ -92,7 +92,7 @@ function UserProfile() {
     if (!token) { navigate('/login'); return; }
     setFavLoading(true);
     try {
-      const res = await axios.get('http://localhost:8000/api/favorites', {
+      const res = await api.get('favorites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFavorites(res.data);
@@ -482,3 +482,4 @@ function UserProfile() {
 }
 
 export default UserProfile;
+
