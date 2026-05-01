@@ -1,16 +1,48 @@
 const nodemailer = require('nodemailer');
 
+// Create Ethereal test account for development
+let etherealTransporter = null;
+
+const createEtherealTransporter = async () => {
+  if (etherealTransporter) return etherealTransporter;
+
+  try {
+    // Create a test account at ethereal.email
+    const testAccount = await nodemailer.createTestAccount();
+
+    etherealTransporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: testAccount.user, // generated ethereal user
+        pass: testAccount.pass, // generated ethereal password
+      },
+    });
+
+    console.log('Ethereal Email Account Created:');
+    console.log('User:', testAccount.user);
+    console.log('Pass:', testAccount.pass);
+    console.log('Web:', 'https://ethereal.email');
+
+    return etherealTransporter;
+  } catch (error) {
+    console.error('Failed to create Ethereal account:', error);
+    throw error;
+  }
+};
+
 // Create a console logger transporter for development
 const mockTransporter = {
   sendMail: async (options) => {
     console.log('\n' + '='.repeat(60));
-    console.log('📧 EMAIL NOTIFICATION');
+    console.log('📧 EMAIL NOTIFICATION (MOCK)');
     console.log('='.repeat(60));
     console.log('To:', options.to);
     console.log('Subject:', options.subject);
     console.log('From:', options.from);
     console.log('='.repeat(60) + '\n');
-    return { messageId: 'dev-' + Date.now() };
+    return { messageId: 'mock-' + Date.now() };
   },
   verify: async () => {
     return true;
@@ -42,23 +74,26 @@ const getTransporter = async () => {
     return cachedTransporter;
   }
 
-  if (!hasEmailConfig()) {
-    console.warn('Email config missing. Using mock transporter (emails will not be sent).');
-    cachedTransporter = mockTransporter;
+  // If email config is available, use Gmail (even in development)
+  if (hasEmailConfig()) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: getEmailPassword(),
+      },
+    });
+
+    await transporter.verify();
+    console.log('Gmail transporter is ready.');
+    cachedTransporter = transporter;
     return cachedTransporter;
   }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: getEmailPassword(),
-    },
-  });
-
-  await transporter.verify();
-  console.log('Email transporter is ready.');
-  cachedTransporter = transporter;
+  // Fallback to Ethereal for development
+  console.log('Using Ethereal email service for development...');
+  cachedTransporter = await createEtherealTransporter();
+  return cachedTransporter;
   return cachedTransporter;
 };
 
@@ -110,7 +145,14 @@ const sendPasswordResetEmail = async (email, resetToken) => {
       `
     };
 
-    await mailTransporter.sendMail(mailOptions);
+    const info = await mailTransporter.sendMail(mailOptions);
+    
+    // Log preview URL for Ethereal emails
+    if (process.env.NODE_ENV !== 'production' && info.messageId && nodemailer.getTestMessageUrl) {
+      console.log('📧 Password reset email sent!');
+      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+    }
+    
     return { success: true, message: 'Password reset email sent successfully' };
   } catch (error) {
     console.error('Email sending error:', error);
@@ -185,8 +227,16 @@ const sendWelcomeEmail = async (email, firstName) => {
       `
     };
 
-    await mailTransporter.sendMail(mailOptions);
-    console.log(`Welcome email sent to ${email}`);
+    const info = await mailTransporter.sendMail(mailOptions);
+    
+    // Log preview URL for Ethereal emails
+    if (process.env.NODE_ENV !== 'production' && info.messageId && nodemailer.getTestMessageUrl) {
+      console.log('📧 Welcome email sent!');
+      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+    } else {
+      console.log(`Welcome email sent to ${email}`);
+    }
+    
     return { success: true };
   } catch (error) {
     console.error('Email sending error:', error);
