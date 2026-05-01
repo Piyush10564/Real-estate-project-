@@ -1,20 +1,25 @@
 import axios from 'axios';
 import config from '../config';
 
-// Create axios instance with base URL
+// Create axios instance
 const api = axios.create({
   baseURL: config.API_BASE_URL,
+
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
+
+  withCredentials: true,
 });
 
-// Add token to requests if available
+// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
