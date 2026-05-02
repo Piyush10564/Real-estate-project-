@@ -56,7 +56,7 @@ app.use(cors(corsOptions));
 
 app.options('*', cors(corsOptions));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 app.use(
   express.urlencoded({
@@ -112,6 +112,27 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/favorites', require('./routes/favorites'));
 
 app.use('/api/inquiries', require('./routes/inquiries'));
+
+const SEED_SECRET = process.env.SEED_SECRET;
+
+if (SEED_SECRET) {
+  app.post('/api/seed', async (req, res) => {
+    const secret = req.query.secret;
+
+    if (secret !== SEED_SECRET) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    try {
+      console.log('Manual seed requested');
+      await seedDatabase({ disconnect: false });
+      return res.json({ message: 'Database seeded successfully' });
+    } catch (error) {
+      console.error('Manual seed failed:', error);
+      return res.status(500).json({ message: 'Seed failed', error: error.message });
+    }
+  });
+}
 
 /* =========================================
    HEALTH CHECK
