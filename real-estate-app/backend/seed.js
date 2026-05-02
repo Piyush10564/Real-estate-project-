@@ -382,15 +382,20 @@ const sampleProperties = [
   }
 ];
 
-async function seedDatabase() {
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Connected to MongoDB');
+async function seedDatabase(options = { disconnect: true }) {
+  let connectedHere = false;
 
-    // Clear existing data
+  try {
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      connectedHere = true;
+      console.log('Connected to MongoDB');
+    }
+
+    // Clear existing sample data so repeated seeding does not duplicate entries.
     await User.deleteMany({ userType: { $in: ['seller', 'agent'] } });
     await Property.deleteMany({ city: { $in: ['Chandigarh', 'Patiala', 'Mohali', 'Sangrur', 'Zirakpur', 'Panchkula'] } });
     console.log('Cleared existing properties and sellers');
@@ -415,9 +420,15 @@ async function seedDatabase() {
   } catch (error) {
     console.error('Error seeding database:', error);
   } finally {
-    await mongoose.connection.close();
-    console.log('Database connection closed');
+    if (options.disconnect && connectedHere) {
+      await mongoose.connection.close();
+      console.log('Database connection closed');
+    }
   }
 }
 
-seedDatabase();
+if (require.main === module) {
+  seedDatabase();
+}
+
+module.exports = seedDatabase;

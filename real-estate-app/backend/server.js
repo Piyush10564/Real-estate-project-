@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const seedDatabase = require('./seed');
 
 const app = express();
 
@@ -74,8 +75,22 @@ mongoose
     useUnifiedTopology: true,
   })
 
-  .then(() => {
+  .then(async () => {
     console.log('MongoDB connected successfully');
+
+    try {
+      const Property = require('./models/Property');
+      const existingCount = await Property.countDocuments();
+
+      if (existingCount === 0) {
+        console.log('No properties found in database. Seeding sample data.');
+        await seedDatabase({ disconnect: false });
+      } else {
+        console.log(`Database already has ${existingCount} properties. Skipping seed.`);
+      }
+    } catch (err) {
+      console.error('Error checking sample data:', err);
+    }
   })
 
   .catch((err) => {
