@@ -10,22 +10,25 @@ const app = express();
    CORS CONFIG
 ========================================= */
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://propify-alpha.vercel.app',
-  'https://www.propify-alpha.vercel.app',
-];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : [
+      'http://localhost:3000',
+      'https://propify-alpha.vercel.app',
+      'https://www.propify-alpha.vercel.app',
+      'https://propify-vi62.onrender.com',
+    ];
 
 console.log('Allowed CORS origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests without origin
+    // Allow requests without origin (server-to-server or same-origin requests)
     if (!origin) {
       return callback(null, true);
     }
 
-    // Allow frontend origins
+    // Allow configured frontend origins
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }

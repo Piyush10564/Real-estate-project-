@@ -8,10 +8,13 @@ function SearchResults() {
   const location = useLocation();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState(location.state?.filters || {});
 
   const fetchSearchResults = useCallback(async () => {
     setLoading(true);
+    setError('');
+
     try {
       const params = {
         ...filters,
@@ -23,9 +26,10 @@ function SearchResults() {
       if (!params.location) delete params.location;
 
       const response = await api.get('/api/properties', { params });
-      setProperties(response.data.properties);
+      setProperties(response.data.properties || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setError(error?.response?.data?.message || error.message || 'Unable to fetch properties.');
     } finally {
       setLoading(false);
     }
@@ -123,6 +127,8 @@ function SearchResults() {
         <h2>Search Results</h2>
         {loading ? (
           <p>Loading properties...</p>
+        ) : error ? (
+          <p className="error-message">{error}</p>
         ) : properties.length > 0 ? (
           <div className="properties-grid">
             {properties.map(property => (
