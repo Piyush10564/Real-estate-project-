@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { uploadMultipleToCloudinary } from '../utils/cloudinary';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PostProperty.css';
@@ -19,6 +20,8 @@ function PostProperty() {
     amenities: '',
     images: []
   });
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -38,11 +41,10 @@ function PostProperty() {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    // In production, you would upload to Cloudinary
-    setFormData(prev => ({
-      ...prev,
-      images: files.map(f => URL.createObjectURL(f))
-    }));
+    setSelectedFiles(files);
+    // Show preview of selected files
+    const fileNames = files.map(f => f.name).join(', ');
+    console.log('Files selected:', fileNames);
   };
 
   const handleSubmit = async (e) => {
@@ -54,8 +56,19 @@ function PostProperty() {
 
     setLoading(true);
     try {
+      // Upload images to Cloudinary if files are selected
+      let imageUrls = formData.images;
+      if (selectedFiles.length > 0) {
+        setUploadingImages(true);
+        console.log('Uploading images to Cloudinary...');
+        imageUrls = await uploadMultipleToCloudinary(selectedFiles);
+        setUploadingImages(false);
+        console.log('Images uploaded successfully:', imageUrls);
+      }
+
       const payload = {
         ...formData,
+        images: imageUrls,
         price: parseInt(formData.price),
         bedrooms: parseInt(formData.bedrooms),
         bathrooms: parseInt(formData.bathrooms),
@@ -71,9 +84,11 @@ function PostProperty() {
       alert('Property posted successfully!');
       navigate('/my-listings');
     } catch (error) {
-      alert(error.response?.data?.message || 'Error posting property');
+      console.error('Error:', error);
+      alert(error.response?.data?.message || error.message || 'Error posting property');
     } finally {
       setLoading(false);
+      setUploadingImages(false);
     }
   };
 
@@ -258,8 +273,8 @@ function PostProperty() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="submit-btn">
-            {loading ? 'Posting...' : 'Post Property'}
+          <button type="submit" disabled={loading || uploadingImages} className="submit-btn">
+            {uploadingImages ? 'Uploading images...' : loading ? 'Posting...' : 'Post Property'}
           </button>
         </form>
       </div>

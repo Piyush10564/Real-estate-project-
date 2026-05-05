@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
@@ -161,15 +162,27 @@ function UserProfile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleProfileImageChange = (e) => {
+  const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImagePreview(reader.result);
-        setFormData(prev => ({ ...prev, profileImage: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setUploadingImage(true);
+        // Show preview while uploading
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to Cloudinary
+        const imageUrl = await uploadToCloudinary(file);
+        setFormData(prev => ({ ...prev, profileImage: imageUrl }));
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Failed to upload image: ' + error.message);
+      } finally {
+        setUploadingImage(false);
+      }
     }
   };
 
