@@ -11,7 +11,7 @@ const config = {
   API_BASE_URL: resolveBaseUrl(),
 
   GOOGLE_MAPS_API_KEY:
-    process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'your_dev_key_here',
+    process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyB_o2-fQyWmh1FgwwPy1xgTJdny6vRG8kA',
 };
 
 export default config;

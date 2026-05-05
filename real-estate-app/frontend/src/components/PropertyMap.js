@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { useState } from 'react';
+import config from '../config';
 
 const PropertyMap = ({ property }) => {
   const [infoWindowOpen, setInfoWindowOpen] = useState(true);
   
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''
+    googleMapsApiKey: config.GOOGLE_MAPS_API_KEY
   });
 
   // Default coordinates (fallback to a central location if not available)
@@ -58,10 +59,10 @@ const PropertyMap = ({ property }) => {
     return <div className="map-loading">Loading map...</div>;
   }
 
-  if (!process.env.REACT_APP_GOOGLE_MAPS_API_KEY) {
+  if (!config.GOOGLE_MAPS_API_KEY || config.GOOGLE_MAPS_API_KEY === 'your_dev_key_here') {
     return (
       <div className="map-error">
-        <p>Google Maps API key is not configured. Please set REACT_APP_GOOGLE_MAPS_API_KEY in your .env file.</p>
+        <p>Google Maps API key is not configured. Please set REACT_APP_GOOGLE_MAPS_API_KEY in your environment.</p>
       </div>
     );
   }
