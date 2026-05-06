@@ -66,6 +66,19 @@ function Messages() {
       hour: '2-digit', minute: '2-digit'
     });
 
+  const getAvatarUrl = (person, fallbackName = 'U') => {
+    if (person?.profileImage) return person.profileImage;
+
+    const name = `${person?.firstName || fallbackName} ${person?.lastName || ''}`.trim();
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || fallbackName)}&background=222&color=b8860b`;
+  };
+
+  const getMessagePerson = (inquiry) => (activeTab === 'sent' ? inquiry.seller : inquiry.buyer);
+  const getMessagePersonName = (inquiry) => {
+    const person = getMessagePerson(inquiry);
+    return `${person?.firstName || ''} ${person?.lastName || ''}`.trim() || 'Unknown User';
+  };
+
   const unreadCount = inquiries.filter(i => !i.isRead).length;
 
   return (
@@ -132,13 +145,8 @@ function Messages() {
                 >
                   <div className="inquiry-avatar">
                     <img
-                      src={
-                        activeTab === 'sent'
-                          ? inquiry.seller?.profileImage
-                          : inquiry.buyer?.profileImage
-                            || `https://ui-avatars.com/api/?name=${encodeURIComponent((activeTab === 'sent' ? inquiry.seller?.firstName : inquiry.buyer?.firstName) || 'U')}&background=222&color=b8860b`
-                      }
-                      alt="User"
+                      src={getAvatarUrl(getMessagePerson(inquiry), activeTab === 'sent' ? 'S' : 'U')}
+                      alt={getMessagePersonName(inquiry)}
                       onError={e => { e.target.src = `https://ui-avatars.com/api/?name=U&background=222&color=b8860b`; }}
                     />
                     {!inquiry.isRead && activeTab === 'received' && <span className="unread-badge" />}
@@ -146,9 +154,7 @@ function Messages() {
                   <div className="inquiry-preview">
                     <div className="inquiry-top">
                       <h4>
-                        {activeTab === 'sent'
-                          ? `${inquiry.seller?.firstName || ''} ${inquiry.seller?.lastName || ''}`
-                          : `${inquiry.buyer?.firstName || ''} ${inquiry.buyer?.lastName || ''}`}
+                        {getMessagePersonName(inquiry)}
                       </h4>
                       {!inquiry.isRead && activeTab === 'received' && (
                         <span className="unread-label">New</span>
@@ -179,20 +185,13 @@ function Messages() {
                 {/* Sender info */}
                 <div className="detail-user">
                   <img
-                    src={
-                      activeTab === 'sent'
-                        ? selectedInquiry.seller?.profileImage
-                        : selectedInquiry.buyer?.profileImage
-                          || `https://ui-avatars.com/api/?name=${encodeURIComponent((activeTab === 'sent' ? selectedInquiry.seller?.firstName : selectedInquiry.buyer?.firstName) || 'U')}&background=222&color=b8860b`
-                    }
-                    alt="User"
+                    src={getAvatarUrl(getMessagePerson(selectedInquiry), activeTab === 'sent' ? 'S' : 'U')}
+                    alt={getMessagePersonName(selectedInquiry)}
                     onError={e => { e.target.src = `https://ui-avatars.com/api/?name=U&background=222&color=b8860b`; }}
                   />
                   <div className="detail-user-info">
                     <h3>
-                      {activeTab === 'sent'
-                        ? `${selectedInquiry.seller?.firstName} ${selectedInquiry.seller?.lastName}`
-                        : `${selectedInquiry.buyer?.firstName} ${selectedInquiry.buyer?.lastName}`}
+                      {getMessagePersonName(selectedInquiry)}
                     </h3>
                     <p className="contact-info">
                       📧 {activeTab === 'sent' ? selectedInquiry.seller?.email : selectedInquiry.buyer?.email}

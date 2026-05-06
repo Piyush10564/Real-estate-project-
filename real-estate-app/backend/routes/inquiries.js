@@ -1,17 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const Inquiry = require('../models/Inquiry');
+const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 
 // Send an inquiry/message to seller
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { sellerId, propertyId, message, buyerPhone } = req.body;
-    const buyerId = req.user.id;
+    const buyerId = req.userId;
 
     // Validate required fields
     if (!sellerId || !propertyId || !message) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const buyer = await User.findById(buyerId).select('email phone firstName lastName');
+
+    if (!buyer) {
+      return res.status(404).json({ message: 'Buyer not found' });
     }
 
     // Create inquiry
@@ -21,8 +28,8 @@ router.post('/', authMiddleware, async (req, res) => {
       property: propertyId,
       message: message,
       buyerContact: {
-        phone: buyerPhone,
-        email: req.user.email
+        phone: buyerPhone || buyer.phone,
+        email: buyer.email
       }
     });
 
@@ -46,7 +53,7 @@ router.post('/', authMiddleware, async (req, res) => {
 // Get all inquiries for the logged-in user (both sent and received)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const type = req.query.type; // 'sent' or 'received'
 
     let query = {};
@@ -88,7 +95,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 
     // Check if user is authorized to view this inquiry
-    if (inquiry.buyer._id.toString() !== req.user.id && inquiry.seller._id.toString() !== req.user.id) {
+    if (inquiry.buyer._id.toString() !== req.userId && inquiry.seller._id.toString() !== req.userId) {
       return res.status(403).json({ message: 'Not authorized to view this inquiry' });
     }
 
@@ -109,7 +116,7 @@ router.patch('/:id/read', authMiddleware, async (req, res) => {
     }
 
     // Only seller can mark as read
-    if (inquiry.seller.toString() !== req.user.id) {
+    if (inquiry.seller.toString() !== req.userId) {
       return res.status(403).json({ message: 'Not authorized to mark this inquiry as read' });
     }
 
@@ -134,7 +141,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     // Only buyer or seller can delete
-    if (inquiry.buyer.toString() !== req.user.id && inquiry.seller.toString() !== req.user.id) {
+    if (inquiry.buyer.toString() !== req.userId && inquiry.seller.toString() !== req.userId) {
       return res.status(403).json({ message: 'Not authorized to delete this inquiry' });
     }
 
