@@ -141,9 +141,30 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create property (seller only)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, upload.array('images', 10), async (req, res) => {
   try {
     const { title, description, price, propertyType, bedrooms, bathrooms, area, address, city, state, zipCode, images, amenities } = req.body;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const uploadedImages = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
+
+    let parsedAmenities = amenities || [];
+    if (typeof parsedAmenities === 'string') {
+      parsedAmenities = parsedAmenities
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    let parsedImages = [];
+    if (Array.isArray(images)) {
+      parsedImages = images;
+    } else if (typeof images === 'string' && images.trim()) {
+      try {
+        parsedImages = JSON.parse(images);
+      } catch {
+        parsedImages = [images];
+      }
+    }
 
     const property = new Property({
       title,
@@ -157,8 +178,8 @@ router.post('/', authMiddleware, async (req, res) => {
       city,
       state,
       zipCode,
-      images: images || [],
-      amenities: amenities || [],
+      images: [...parsedImages, ...uploadedImages],
+      amenities: parsedAmenities,
       seller: req.userId
     });
 

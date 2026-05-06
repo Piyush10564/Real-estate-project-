@@ -55,39 +55,23 @@ function PostProperty() {
 
     setLoading(true);
     try {
-      // Upload images to the backend if files are selected
-      let imageUrls = formData.images;
-      if (selectedFiles.length > 0) {
-        setUploadingImages(true);
-        console.log('Uploading images to backend...');
-        const uploadFormData = new FormData();
-        selectedFiles.forEach((file) => uploadFormData.append('images', file));
+      setUploadingImages(selectedFiles.length > 0);
 
-        const uploadResponse = await api.post('/api/properties/upload-images', uploadFormData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'images') return;
+        if (key === 'amenities') {
+          payload.append(key, JSON.stringify(value));
+          return;
+        }
+        payload.append(key, value);
+      });
 
-        imageUrls = uploadResponse.data.images || [];
-        setUploadingImages(false);
-        console.log('Images uploaded successfully:', imageUrls);
-      }
+      selectedFiles.forEach((file) => payload.append('images', file));
 
-      const payload = {
-        ...formData,
-        images: imageUrls,
-        price: parseInt(formData.price),
-        bedrooms: parseInt(formData.bedrooms),
-        bathrooms: parseInt(formData.bathrooms),
-        area: parseInt(formData.area)
-      };
-
-      await api.post(
-        '/api/properties',
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post('/api/properties', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       alert('Property posted successfully!');
       navigate('/my-listings');
