@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaHome, FaClock, FaTrash, FaMapMarkerAlt, FaInbox, FaPaperPlane } from 'react-icons/fa';
 import { formatPriceINR } from '../utils/priceFormatter';
+import ChatWindow from '../components/ChatWindow';
 import '../styles/Messages.css';
 
 function Messages() {
@@ -10,6 +11,8 @@ function Messages() {
   const [activeTab, setActiveTab] = useState('received');
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showChatWindow, setShowChatWindow] = useState(false);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
@@ -32,7 +35,19 @@ function Messages() {
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
     fetchInquiries();
+    fetchCurrentUser();
   }, [fetchInquiries, navigate, token]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get('/api/users/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCurrentUser(res.data.user);
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
 
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm('Delete this message?')) return;
@@ -231,12 +246,29 @@ function Messages() {
                 {/* Actions */}
                 <div className="detail-actions">
                   <button
+                    className="chat-btn"
+                    onClick={() => setShowChatWindow(!showChatWindow)}
+                  >
+                    💬 {showChatWindow ? 'Close Chat' : 'Open Chat'}
+                  </button>
+                  <button
                     className="delete-btn"
                     onClick={() => handleDeleteInquiry(selectedInquiry._id)}
                   >
                     <FaTrash /> Delete Message
                   </button>
                 </div>
+
+                {/* Chat Window */}
+                {showChatWindow && currentUser && (
+                  <div className="chat-window-container">
+                    <ChatWindow
+                      inquiry={selectedInquiry}
+                      currentUser={currentUser}
+                      onClose={() => setShowChatWindow(false)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (

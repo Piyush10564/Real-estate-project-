@@ -5,8 +5,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const seedDatabase = require('./seed');
+const http = require('http');
+const socketIO = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
 
 /* =========================================
    CORS CONFIG
@@ -25,47 +28,107 @@ console.log('Allowed CORS origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests without origin (server-to-server or same-origin requests)
     if (!origin) {
       return callback(null, true);
     }
-
-    // Allow configured frontend origins
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-
     console.log('Blocked Origin:', origin);
-
-    return callback(
-      new Error(`CORS blocked for origin: ${origin}`)
-    );
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
-
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-
   allowedHeaders: ['Content-Type', 'Authorization'],
-
   credentials: true,
 };
+
+/* =========================================
+   SOCKET.IO CONFIG
+========================================= */
+
+const io = socketIO(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+// Store active user connections
+const userConnections = {};
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('user:join', (userId) => {
+    userConnections[userId] = socket.id;
+    console.log(`User ${userId} connected with socket ${socket.id}`);
+  });
+
+  socket.on('message:send', async (data) => {
+    try {
+      const Message = require('./models/Message');
+      const { inquiryId, senderId, recipientId, message } = data;
+
+      const newMessage = new Message({
+        inquiry: inquiryId,
+        sender: senderId,
+        recipient: recipientId,
+        message: message,
+      });
+
+      await newMessage.save();
+      await newMessage.populate('sender', 'firstName lastName profileImage');
+
+      if (userConnections[recipientId]) {
+        io.to(userConnections[recipientId]).emit('message:receive', {
+          _id: newMessage._id,
+          inquiry: inquiryId,
+          sender: newMessage.sender,
+          message: message,
+          createdAt: newMessage.createdAt,
+        });
+      }
+
+      socket.emit('message:sent', {
+        _id: newMessage._id,
+        message: message,
+        createdAt: newMessage.createdAt,
+      });
+    } catch (error) {
+      console.error('Error saving message:', error);
+      socket.emit('message:error', { error: error.message });
+    }
+  });
+
+  socket.on('message:markRead', async (messageId) => {
+    try {
+      const Message = require('./models/Message');
+      await Message.findByIdAndUpdate(messageId, { isRead: true });
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    for (const userId in userConnections) {
+      if (userConnections[userId] === socket.id) {
+        delete userConnections[userId];
+        console.log(`User ${userId} disconnected`);
+        break;
+      }
+    }
+  });
+});
 
 /* =========================================
    MIDDLEWARE
 ========================================= */
 
 app.use(cors(corsOptions));
-
 app.options('*', cors(corsOptions));
-
 app.use(express.json({ limit: '50mb' }));
-
-app.use(
-  express.urlencoded({
-    limit: '50mb',
-    extended: true,
-  })
-);
-
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* =========================================
@@ -77,7 +140,6 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-
   .then(async () => {
     console.log('MongoDB connected successfully');
 
@@ -95,7 +157,6 @@ mongoose
       console.error('Error checking sample data:', err);
     }
   })
-
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
@@ -105,27 +166,21 @@ mongoose
 ========================================= */
 
 app.use('/api/auth', require('./routes/auth'));
-
 app.use('/api/properties', require('./routes/properties'));
-
 app.use('/api/reviews', require('./routes/reviews'));
-
 app.use('/api/users', require('./routes/users'));
-
 app.use('/api/favorites', require('./routes/favorites'));
-
 app.use('/api/inquiries', require('./routes/inquiries'));
+app.use('/api/messages', require('./routes/messages'));
 
 const SEED_SECRET = process.env.SEED_SECRET;
 
 if (SEED_SECRET) {
   app.post('/api/seed', async (req, res) => {
     const secret = req.query.secret;
-
     if (secret !== SEED_SECRET) {
       return res.status(403).json({ message: 'Forbidden' });
     }
-
     try {
       console.log('Manual seed requested');
       await seedDatabase({ disconnect: false });
@@ -142,9 +197,7 @@ if (SEED_SECRET) {
 ========================================= */
 
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'Server is running',
-  });
+  res.json({ status: 'Server is running' });
 });
 
 /* =========================================
@@ -153,7 +206,6 @@ app.get('/api/health', (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     status: err.status || 500,
@@ -166,6 +218,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`WebSocket server ready for connections`);
 });

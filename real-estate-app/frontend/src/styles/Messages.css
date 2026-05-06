@@ -390,7 +390,29 @@
 
 .detail-actions {
   display: flex;
+  gap: 8px;
   justify-content: flex-start;
+}
+
+.chat-btn {
+  padding: 9px 12px;
+  border-radius: 5px;
+  border: 1px solid #c9b9a3;
+  background: #b8860b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chat-btn:hover {
+  background: #a07c07;
 }
 
 .delete-btn {
@@ -406,6 +428,15 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
+}
+
+.chat-window-container {
+  margin-top: 14px;
+  border: 1px solid #e1d7cc;
+  border-radius: 8px;
+  height: 400px;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {
