@@ -1,5 +1,4 @@
 import api from '../utils/api';
-import { uploadToCloudinary } from '../utils/cloudinary';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaBed, FaBath, FaRuler, FaTrash, FaEnvelope, FaClock, FaHome } from 'react-icons/fa';
@@ -64,7 +63,8 @@ function UserProfile() {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   /* -- favorites state -- */
   const [favorites, setFavorites] = useState([]);
@@ -165,42 +165,45 @@ function UserProfile() {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      try {
-        setUploadingImage(true);
-        // Show preview while uploading
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setProfileImagePreview(reader.result);
-        };
-        reader.readAsDataURL(file);
-
-        // Upload to Cloudinary
-        const imageUrl = await uploadToCloudinary(file);
-        setFormData(prev => ({ ...prev, profileImage: imageUrl }));
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Failed to upload image: ' + error.message);
-      } finally {
-        setUploadingImage(false);
-      }
+      setProfileImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setUploadingImage(true);
+    setSavingProfile(true);
     try {
-      const res = await api.put(`/api/users/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
+      const requestData = new FormData();
+      requestData.append('firstName', formData.firstName ?? '');
+      requestData.append('lastName', formData.lastName ?? '');
+      requestData.append('phone', formData.phone ?? '');
+      requestData.append('location', formData.location ?? '');
+      requestData.append('company', formData.company ?? '');
+      requestData.append('bio', formData.bio ?? '');
+
+      if (profileImageFile) {
+        requestData.append('profileImage', profileImageFile);
+      }
+
+      const res = await api.put(`/api/users/${id}`, requestData, {
+        headers: {}
       });
+
       setUser(res.data.user);
+      setFormData(res.data.user);
       setActiveTab('profile');
       setProfileImagePreview(null);
+      setProfileImageFile(null);
       alert('Profile updated successfully!');
     } catch (e) {
       console.error(e);
-      alert('Error updating profile');
-    } finally { setUploadingImage(false); }
+      alert(e.response?.data?.message || e.message || 'Error updating profile');
+    } finally { setSavingProfile(false); }
   };
 
   const formatDate = (d) =>
@@ -221,7 +224,7 @@ function UserProfile() {
 
         {/* ══════════ SIDEBAR ══════════ */}
         <aside className="profile-sidebar">
-          <img src={user.profileImage || avatarSrc} alt={user.firstName} className="sidebar-avatar" />
+          <img src={avatarSrc} alt={user.firstName} className="sidebar-avatar" />
           <p className="sidebar-name">{user.firstName} {user.lastName}</p>
           <p className="sidebar-email">{user.email}</p>
           <span className="sidebar-badge">{user.userType}</span>
@@ -256,7 +259,7 @@ function UserProfile() {
               <h2 className="profile-main-title">Account Settings</h2>
               <p className="profile-main-subtitle">View and manage your profile information</p>
               <div className="profile-view-header">
-                <img src={user.profileImage || avatarSrc} alt={user.firstName} className="profile-view-avatar" />
+                <img src={avatarSrc} alt={user.firstName} className="profile-view-avatar" />
                 <div className="profile-view-info">
                   <span className="user-type">{user.userType?.toUpperCase()}</span>
                   <h1>{user.firstName} {user.lastName}</h1>
@@ -308,7 +311,7 @@ function UserProfile() {
               <h2 className="profile-main-title">Edit Profile</h2>
               <p className="profile-main-subtitle">Update your personal information below</p>
               <div className="avatar-edit-row">
-                <img src={profileImagePreview || user.profileImage || avatarSrc} alt="Preview" className="avatar-edit-img" />
+                <img src={avatarSrc} alt="Preview" className="avatar-edit-img" />
                 <div className="avatar-edit-actions">
                   <label htmlFor="profileImage" className="avatar-upload-btn">
                     📷 Upload New
@@ -348,10 +351,10 @@ function UserProfile() {
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="save-btn" disabled={uploadingImage}>
-                  {uploadingImage ? '⏳ Saving...' : '💾 Save Changes'}
+                <button type="submit" className="save-btn" disabled={savingProfile}>
+                  {savingProfile ? '⏳ Saving...' : '💾 Save Changes'}
                 </button>
-                <button type="button" className="cancel-btn" onClick={() => { setActiveTab('profile'); setFormData(user); setProfileImagePreview(null); }}>
+                <button type="button" className="cancel-btn" onClick={() => { setActiveTab('profile'); setFormData(user); setProfileImagePreview(null); setProfileImageFile(null); }}>
                   Cancel
                 </button>
               </div>
