@@ -1,72 +1,207 @@
-.favorites {
+.favorites-page {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 14px 24px 24px;
+  padding: 18px 24px 34px;
 }
 
-.favorites h1 {
-  font-size: clamp(2rem, 3.6vw, 3rem);
-  margin-bottom: 14px;
+.favorites-header {
+  margin-bottom: 22px;
+}
+
+.favorites-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 6px;
+}
+
+.favorites-header p {
+  color: var(--muted);
+  font-size: 15px;
 }
 
 .favorites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 22px;
 }
 
-.favorite-item {
-  background: #fff;
-  border: 1px solid #e1d6cb;
-  border-radius: 8px;
-  padding-bottom: 10px;
+.favorite-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px rgba(52, 33, 18, 0.14);
+}
+
+.favorite-image {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  display: block;
+  background: #ddd5cc;
+}
+
+.favorite-content {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.favorite-content h2 {
+  font-size: 1.6rem;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.favorite-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.favorite-price {
+  font-size: 1.5rem;
+  color: var(--accent-2);
+}
+
+.favorite-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: #5f544a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.favorite-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.favorite-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.favorite-actions .view-btn,
+.favorite-actions .remove-btn {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.favorite-actions .view-btn {
+  background: #1f1a15;
+  color: #fbf7f2;
+}
+
+.favorite-actions .view-btn:hover {
+  background: #34291f;
 }
 
 .remove-btn {
-  width: calc(100% - 20px);
-  margin: 10px auto 0;
-  display: block;
-  padding: 10px;
   background: #fff2ef;
   color: #95372e;
   border: 1px solid #eac8c1;
-  border-radius: 5px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
-.no-favorites {
+.remove-btn:hover:not(:disabled) {
+  background: #ffe7e2;
+  border-color: #dcb1a8;
+}
+
+.remove-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.no-favorites,
+.favorites-loading,
+.favorites-error {
   text-align: center;
-  padding: 46px 20px;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e1d7ca;
+  padding: 56px 24px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.no-favorites h2,
+.favorites-loading h2,
+.favorites-error h2 {
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  margin-bottom: 10px;
 }
 
 .no-favorites p {
-  color: #6d6157;
-  margin-bottom: 14px;
+  color: var(--muted);
+  margin-bottom: 18px;
 }
 
-.search-btn {
-  padding: 10px 16px;
+.browse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: 10px;
   background: #1f1a15;
   color: #f8f5ef;
-  border-radius: 5px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+}
+
+.browse-btn:hover {
+  background: #34291f;
 }
 
 @media (max-width: 760px) {
-  .favorites {
-    padding: 10px 14px 18px;
+  .favorites-page {
+    padding: 14px 14px 24px;
   }
 
   .favorites-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .favorite-image {
+    height: 210px;
+  }
+
+  .favorite-content {
+    padding: 16px;
+  }
+
+  .favorite-actions {
     grid-template-columns: 1fr;
   }
 }
