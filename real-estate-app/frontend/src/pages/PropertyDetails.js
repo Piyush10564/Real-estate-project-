@@ -135,9 +135,12 @@ function PropertyDetails() {
   if (loading || !property) return <div className="loading">Loading property details...</div>;
 
   const imageUrl = property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/600x400';
+  const sellerAvatarUrl =
+    property.seller?.profileImage ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(`${property.seller?.firstName || 'S'} ${property.seller?.lastName || 'eller'}`)}&background=2f261f&color=f7f2eb&size=128`;
 
   return (
-    <div className="property-details">
+    <div className="property-details-page">
       <div className="property-gallery">
         <img src={imageUrl} alt={property.title} />
         <div className="property-actions">
@@ -248,7 +251,7 @@ function PropertyDetails() {
           <div className="seller-card">
             <h3>Seller Information</h3>
             <div className="seller-info">
-              <img src={property.seller?.profileImage || 'https://via.placeholder.com/100'} alt={property.seller?.firstName} />
+                <img src={sellerAvatarUrl} alt={property.seller?.firstName || 'Seller'} />
               <div>
                 <h4>{property.seller?.firstName} {property.seller?.lastName}</h4>
                 <p>{property.seller?.company}</p>

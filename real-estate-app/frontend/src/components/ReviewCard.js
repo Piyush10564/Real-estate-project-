@@ -4,14 +4,17 @@ import '../styles/ReviewCard.css';
 
 function ReviewCard({ review }) {
   const reviewDate = new Date(review.createdAt).toLocaleDateString();
+  const reviewerAvatarUrl =
+    review.reviewer?.profileImage ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(`${review.reviewer?.firstName || 'U'} ${review.reviewer?.lastName || 'ser'}`)}&background=2f261f&color=f7f2eb&size=96`;
 
   return (
     <div className="review-card">
       <div className="review-header">
         <div className="reviewer-info">
           <img 
-            src={review.reviewer?.profileImage || 'https://via.placeholder.com/50'} 
-            alt={review.reviewer?.firstName}
+            src={reviewerAvatarUrl} 
+            alt={review.reviewer?.firstName || 'Reviewer'}
             className="reviewer-avatar"
           />
           <div>

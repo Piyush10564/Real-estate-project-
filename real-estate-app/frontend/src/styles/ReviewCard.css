@@ -30,6 +30,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #d8cabd;
+  background: #f3ede5;
 }
 
 .reviewer-info h4 {

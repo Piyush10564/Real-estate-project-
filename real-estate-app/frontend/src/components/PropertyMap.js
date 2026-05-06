@@ -30,9 +30,9 @@ const PropertyMap = ({ property }) => {
 
   const containerStyle = {
     width: '100%',
-    height: '400px',
+    height: '320px',
     borderRadius: '8px',
-    marginTop: '20px'
+    marginTop: '0'
   };
 
   const mapOptions = {
@@ -72,7 +72,7 @@ const PropertyMap = ({ property }) => {
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={mapCenter}
-        zoom={15}
+        zoom={14}
         options={mapOptions}
       >
         <Marker
