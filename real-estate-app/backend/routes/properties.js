@@ -1,7 +1,55 @@
 const express = require('express');
 const Property = require('../models/Property');
 const authMiddleware = require('../middleware/auth');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
+
+const propertyUploadsDir = path.join(__dirname, '..', 'uploads', 'property-images');
+
+if (!fs.existsSync(propertyUploadsDir)) {
+  fs.mkdirSync(propertyUploadsDir, { recursive: true });
+}
+
+const propertyStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, propertyUploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const safeName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+    cb(null, safeName);
+  }
+});
+
+const upload = multer({
+  storage: propertyStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed'));
+    }
+    cb(null, true);
+  }
+});
+
+// Upload property images
+router.post('/upload-images', authMiddleware, upload.array('images', 10), async (req, res) => {
+  try {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const imageUrls = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
+
+    res.json({
+      message: 'Images uploaded successfully',
+      images: imageUrls,
+    });
+  } catch (error) {
+    console.error('Error uploading property images:', error);
+    res.status(500).json({ message: 'Error uploading property images', error: error.message });
+  }
+});
 
 // Get all properties with filters
 router.get('/', async (req, res) => {

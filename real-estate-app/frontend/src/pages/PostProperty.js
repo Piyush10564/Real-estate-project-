@@ -1,5 +1,4 @@
 import api from '../utils/api';
-import { uploadMultipleToCloudinary } from '../utils/cloudinary';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PostProperty.css';
@@ -56,12 +55,21 @@ function PostProperty() {
 
     setLoading(true);
     try {
-      // Upload images to Cloudinary if files are selected
+      // Upload images to the backend if files are selected
       let imageUrls = formData.images;
       if (selectedFiles.length > 0) {
         setUploadingImages(true);
-        console.log('Uploading images to Cloudinary...');
-        imageUrls = await uploadMultipleToCloudinary(selectedFiles);
+        console.log('Uploading images to backend...');
+        const uploadFormData = new FormData();
+        selectedFiles.forEach((file) => uploadFormData.append('images', file));
+
+        const uploadResponse = await api.post('/api/properties/upload-images', uploadFormData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        imageUrls = uploadResponse.data.images || [];
         setUploadingImages(false);
         console.log('Images uploaded successfully:', imageUrls);
       }
