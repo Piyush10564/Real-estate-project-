@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import api from '../utils/api';
 import '../styles/ChatWindow.css';
@@ -18,18 +18,7 @@ function ChatWindow({ inquiry, currentUser, onClose }) {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    fetchMessages();
-    connectSocket();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [inquiry._id]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -42,9 +31,9 @@ function ChatWindow({ inquiry, currentUser, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inquiry._id]);
 
-  const connectSocket = () => {
+  const connectSocket = useCallback(() => {
     const token = localStorage.getItem('token');
     const socketUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8000';
 
@@ -78,7 +67,18 @@ function ChatWindow({ inquiry, currentUser, onClose }) {
     socketRef.current.on('disconnect', () => {
       console.log('Disconnected from chat server');
     });
-  };
+  }, [currentUser?._id, inquiry._id]);
+
+  useEffect(() => {
+    fetchMessages();
+    connectSocket();
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [connectSocket, fetchMessages]);
 
   const sendMessage = (e) => {
     e.preventDefault();

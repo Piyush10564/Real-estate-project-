@@ -11,7 +11,14 @@ function Messages() {
   const [activeTab, setActiveTab] = useState('received');
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser] = useState(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      return storedUser?.id ? { ...storedUser, _id: storedUser.id } : null;
+    } catch {
+      return null;
+    }
+  });
   const [showChatWindow, setShowChatWindow] = useState(false);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
@@ -35,19 +42,7 @@ function Messages() {
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
     fetchInquiries();
-    fetchCurrentUser();
   }, [fetchInquiries, navigate, token]);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const res = await api.get('/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setCurrentUser(res.data.user);
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-    }
-  };
 
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm('Delete this message?')) return;
