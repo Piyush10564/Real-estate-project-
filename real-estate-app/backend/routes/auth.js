@@ -56,7 +56,14 @@ router.post('/register', async (req, res) => {
 
     console.log(`User registered successfully: ${normalizedEmail}`);
 
-    // Send response IMMEDIATELY
+    // Send welcome email before finishing the request so it is reliably attempted.
+    const welcomeResult = await sendWelcomeEmail(normalizedEmail, firstName);
+    if (!welcomeResult.success) {
+      console.warn(`Welcome email failed for ${normalizedEmail}: ${welcomeResult.error || 'Unknown error'}`);
+    } else {
+      console.log(`Welcome email sent to ${normalizedEmail}`);
+    }
+
     res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -67,21 +74,6 @@ router.post('/register', async (req, res) => {
         email: user.email,
         userType: user.userType
       }
-    });
-
-    // Send welcome email in background (completely non-blocking after response)
-    setImmediate(() => {
-      sendWelcomeEmail(normalizedEmail, firstName)
-        .then((welcomeResult) => {
-          if (!welcomeResult.success) {
-            console.warn(`Welcome email failed for ${normalizedEmail}: ${welcomeResult.error || 'Unknown error'}`);
-          } else {
-            console.log(`Welcome email sent to ${normalizedEmail}`);
-          }
-        })
-        .catch((error) => {
-          console.warn(`Welcome email failed for ${normalizedEmail}: ${error.message}`);
-        });
     });
   } catch (error) {
     console.error('Registration error:', error);
