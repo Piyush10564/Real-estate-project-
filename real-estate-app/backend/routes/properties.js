@@ -143,41 +143,78 @@ router.get('/:id', async (req, res) => {
 // Create property (seller only)
 router.post('/', authMiddleware, upload.array('images', 10), async (req, res) => {
   try {
-    const { title, description, price, propertyType, bedrooms, bathrooms, area, address, city, state, zipCode, images, amenities } = req.body;
+    let { title, description, price, propertyType, bedrooms, bathrooms, area, address, city, state, zipCode, images, amenities } = req.body;
+    
+    console.log('POST /api/properties - Request body:', {
+      title, description, price, propertyType, bedrooms, bathrooms, area, address, city, state, zipCode
+    });
+    console.log('Files received:', req.files?.length || 0);
+    
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const uploadedImages = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
 
+    // Trim string values
+    title = String(title || '').trim();
+    description = String(description || '').trim();
+    address = String(address || '').trim();
+    city = String(city || '').trim();
+    state = String(state || '').trim();
+    propertyType = String(propertyType || '').trim();
+    zipCode = String(zipCode || '').trim();
+
     // Convert string values to numbers
-    const parsedPrice = Number(price);
-    const parsedBedrooms = Number(bedrooms);
-    const parsedBathrooms = Number(bathrooms);
-    const parsedArea = Number(area);
+    const parsedPrice = Number(price) || 0;
+    const parsedBedrooms = Number(bedrooms) || 0;
+    const parsedBathrooms = Number(bathrooms) || 0;
+    const parsedArea = Number(area) || 0;
 
     // Validate required fields
-    if (!title || !description || !address || !city || !state || !propertyType) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    const missingFields = [];
+    if (!title) missingFields.push('title');
+    if (!description) missingFields.push('description');
+    if (!address) missingFields.push('address');
+    if (!city) missingFields.push('city');
+    if (!state) missingFields.push('state');
+    if (!propertyType) missingFields.push('propertyType');
+    if (!parsedPrice || parsedPrice <= 0) missingFields.push('price (must be > 0)');
+    if (!parsedBedrooms || parsedBedrooms <= 0) missingFields.push('bedrooms (must be > 0)');
+    if (!parsedBathrooms || parsedBathrooms <= 0) missingFields.push('bathrooms (must be > 0)');
+    if (!parsedArea || parsedArea <= 0) missingFields.push('area (must be > 0)');
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        message: 'Missing or invalid required fields',
+        missingFields,
+        receivedData: req.body
+      });
     }
 
-    if (isNaN(parsedPrice) || isNaN(parsedBedrooms) || isNaN(parsedBathrooms) || isNaN(parsedArea)) {
-      return res.status(400).json({ message: 'Price, bedrooms, bathrooms, and area must be valid numbers' });
-    }
-
-    let parsedAmenities = amenities || [];
-    if (typeof parsedAmenities === 'string') {
-      parsedAmenities = parsedAmenities
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean);
+    let parsedAmenities = [];
+    if (amenities) {
+      try {
+        // Try parsing as JSON first (if sent as JSON string)
+        if (typeof amenities === 'string') {
+          parsedAmenities = JSON.parse(amenities);
+        } else if (Array.isArray(amenities)) {
+          parsedAmenities = amenities;
+        }
+      } catch (e) {
+        console.log('Could not parse amenities, treating as string');
+        parsedAmenities = [];
+      }
     }
 
     let parsedImages = [];
-    if (Array.isArray(images)) {
-      parsedImages = images;
-    } else if (typeof images === 'string' && images.trim()) {
+    if (images) {
       try {
-        parsedImages = JSON.parse(images);
-      } catch {
-        parsedImages = [images];
+        if (typeof images === 'string' && images.trim()) {
+          parsedImages = JSON.parse(images);
+        } else if (Array.isArray(images)) {
+          parsedImages = images;
+        }
+      } catch (e) {
+        console.log('Could not parse images field');
+        parsedImages = [];
       }
     }
 
@@ -202,7 +239,7 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
     res.status(201).json({ message: 'Property created successfully', property });
   } catch (error) {
     console.error('Error creating property:', error);
-    res.status(500).json({ message: 'Error creating property', error: error.message });
+    res.status(500).json({ message: 'Error creating property', error: error.message, details: error.stack });
   }
 });
 
