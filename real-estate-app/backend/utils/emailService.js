@@ -84,16 +84,22 @@ const getTransporter = async () => {
       },
     });
 
-    await transporter.verify();
-    console.log('Gmail transporter is ready.');
+    // Don't verify synchronously - cache it immediately and verify in background
     cachedTransporter = transporter;
+    
+    // Verify in background (non-blocking)
+    transporter.verify().then(() => {
+      console.log('Gmail transporter verified successfully.');
+    }).catch((err) => {
+      console.warn('Gmail transporter verification failed:', err.message);
+    });
+
     return cachedTransporter;
   }
 
   // Fallback to Ethereal for development
   console.log('Using Ethereal email service for development...');
   cachedTransporter = await createEtherealTransporter();
-  return cachedTransporter;
   return cachedTransporter;
 };
 

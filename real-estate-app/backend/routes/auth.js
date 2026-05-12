@@ -47,17 +47,6 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Send welcome email without blocking registration response
-    sendWelcomeEmail(normalizedEmail, firstName)
-      .then((welcomeResult) => {
-        if (!welcomeResult.success) {
-          console.warn(`Welcome email failed for ${normalizedEmail}: ${welcomeResult.error || 'Unknown error'}`);
-        }
-      })
-      .catch((error) => {
-        console.warn(`Welcome email failed for ${normalizedEmail}: ${error.message}`);
-      });
-
     // Create JWT token
     const token = jwt.sign(
       { userId: user._id },
@@ -67,6 +56,7 @@ router.post('/register', async (req, res) => {
 
     console.log(`User registered successfully: ${normalizedEmail}`);
 
+    // Send response IMMEDIATELY
     res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -77,6 +67,21 @@ router.post('/register', async (req, res) => {
         email: user.email,
         userType: user.userType
       }
+    });
+
+    // Send welcome email in background (completely non-blocking after response)
+    setImmediate(() => {
+      sendWelcomeEmail(normalizedEmail, firstName)
+        .then((welcomeResult) => {
+          if (!welcomeResult.success) {
+            console.warn(`Welcome email failed for ${normalizedEmail}: ${welcomeResult.error || 'Unknown error'}`);
+          } else {
+            console.log(`Welcome email sent to ${normalizedEmail}`);
+          }
+        })
+        .catch((error) => {
+          console.warn(`Welcome email failed for ${normalizedEmail}: ${error.message}`);
+        });
     });
   } catch (error) {
     console.error('Registration error:', error);
