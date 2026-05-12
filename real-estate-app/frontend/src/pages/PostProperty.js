@@ -53,6 +53,12 @@ function PostProperty() {
       return;
     }
 
+    // Validate required numeric fields
+    if (!formData.price || !formData.bedrooms || !formData.bathrooms || !formData.area) {
+      alert('Please fill in all required fields (price, bedrooms, bathrooms, area)');
+      return;
+    }
+
     setLoading(true);
     try {
       setUploadingImages(selectedFiles.length > 0);
@@ -64,7 +70,12 @@ function PostProperty() {
           payload.append(key, JSON.stringify(value));
           return;
         }
-        payload.append(key, value);
+        // Convert numeric fields
+        if (['price', 'bedrooms', 'bathrooms', 'area'].includes(key)) {
+          payload.append(key, Number(value));
+        } else {
+          payload.append(key, value);
+        }
       });
 
       selectedFiles.forEach((file) => payload.append('images', file));

@@ -136,7 +136,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 ========================================= */
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

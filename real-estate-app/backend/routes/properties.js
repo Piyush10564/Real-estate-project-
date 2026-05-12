@@ -147,6 +147,21 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const uploadedImages = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
 
+    // Convert string values to numbers
+    const parsedPrice = Number(price);
+    const parsedBedrooms = Number(bedrooms);
+    const parsedBathrooms = Number(bathrooms);
+    const parsedArea = Number(area);
+
+    // Validate required fields
+    if (!title || !description || !address || !city || !state || !propertyType) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    if (isNaN(parsedPrice) || isNaN(parsedBedrooms) || isNaN(parsedBathrooms) || isNaN(parsedArea)) {
+      return res.status(400).json({ message: 'Price, bedrooms, bathrooms, and area must be valid numbers' });
+    }
+
     let parsedAmenities = amenities || [];
     if (typeof parsedAmenities === 'string') {
       parsedAmenities = parsedAmenities
@@ -169,11 +184,11 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
     const property = new Property({
       title,
       description,
-      price,
+      price: parsedPrice,
       propertyType,
-      bedrooms,
-      bathrooms,
-      area,
+      bedrooms: parsedBedrooms,
+      bathrooms: parsedBathrooms,
+      area: parsedArea,
       address,
       city,
       state,
@@ -186,7 +201,8 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
     await property.save();
     res.status(201).json({ message: 'Property created successfully', property });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating property:', error);
+    res.status(500).json({ message: 'Error creating property', error: error.message });
   }
 });
 
