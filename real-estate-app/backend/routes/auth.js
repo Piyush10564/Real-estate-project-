@@ -47,14 +47,16 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Send welcome email (non-blocking)
-    sendWelcomeEmail(normalizedEmail, firstName).then(result => {
-      if (!result.success) {
-        console.warn(`Welcome email failed for ${normalizedEmail}: ${result.error || 'Unknown error'}`);
-      }
-    }).catch(err => {
-      console.error(`Welcome email error for ${normalizedEmail}:`, err);
-    });
+    // Send welcome email without blocking registration response
+    sendWelcomeEmail(normalizedEmail, firstName)
+      .then((welcomeResult) => {
+        if (!welcomeResult.success) {
+          console.warn(`Welcome email failed for ${normalizedEmail}: ${welcomeResult.error || 'Unknown error'}`);
+        }
+      })
+      .catch((error) => {
+        console.warn(`Welcome email failed for ${normalizedEmail}: ${error.message}`);
+      });
 
     // Create JWT token
     const token = jwt.sign(
