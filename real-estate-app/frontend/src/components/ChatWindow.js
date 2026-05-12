@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import api from '../utils/api';
+import { normalizeBaseUrl } from '../config';
 import '../styles/ChatWindow.css';
 
 function ChatWindow({ inquiry, currentUser, onClose }) {
@@ -35,7 +36,7 @@ function ChatWindow({ inquiry, currentUser, onClose }) {
 
   const connectSocket = useCallback(() => {
     const token = localStorage.getItem('token');
-    const socketUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const socketUrl = normalizeBaseUrl(process.env.REACT_APP_API_URL || process.env.VITE_API_URL) || 'http://localhost:8000';
 
     socketRef.current = io(socketUrl, {
       auth: { token },
