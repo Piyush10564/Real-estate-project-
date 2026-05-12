@@ -135,20 +135,22 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
    DATABASE CONNECTION
 ========================================= */
 
-// Check if MONGO_URI is provided
-if (!process.env.MONGO_URI) {
-  console.error('❌ CRITICAL ERROR: MONGO_URI environment variable is not set!');
-  console.error('Please set MONGO_URI in your environment variables.');
+// Check if MONGODB_URI is provided (with fallback to MONGO_URI for local development)
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!mongoUri) {
+  console.error('❌ CRITICAL ERROR: MONGODB_URI environment variable is not set!');
+  console.error('Please set MONGODB_URI in your environment variables.');
   if (process.env.NODE_ENV === 'production') {
-    console.error('On Render: Go to Settings > Environment Variables and add MONGO_URI');
+    console.error('On Render: Go to Settings > Environment Variables and add MONGODB_URI');
   } else {
-    console.error('Locally: Add MONGO_URI to your .env file');
+    console.error('Locally: Add MONGODB_URI to your .env file');
   }
   process.exit(1);
 }
 
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(mongoUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
