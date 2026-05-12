@@ -155,6 +155,12 @@ mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    maxPoolSize: 10,
+    minPoolSize: 5,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 10000,
+    retryWrites: true,
   })
   .then(async () => {
     console.log('MongoDB connected successfully');
@@ -176,6 +182,21 @@ mongoose
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
+
+/* =========================================
+   MONGODB CONNECTION EVENTS
+========================================= */
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconnected');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err.message);
+});
 
 /* =========================================
    ROUTES
