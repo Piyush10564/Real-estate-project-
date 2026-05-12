@@ -9,10 +9,25 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, userType } = req.body;
+    
+    console.log('Register request received:', { firstName, lastName, email, password: password ? '***' : 'missing', userType });
+    
     const normalizedEmail = (email || '').trim().toLowerCase();
 
-    if (!firstName || !lastName || !normalizedEmail || !password) {
-      return res.status(400).json({ message: 'Please fill all required fields' });
+    // Detailed validation
+    const missingFields = [];
+    if (!firstName || String(firstName).trim() === '') missingFields.push('firstName');
+    if (!lastName || String(lastName).trim() === '') missingFields.push('lastName');
+    if (!normalizedEmail || normalizedEmail === '') missingFields.push('email');
+    if (!password || String(password).trim() === '') missingFields.push('password');
+
+    if (missingFields.length > 0) {
+      console.log('Missing fields:', missingFields);
+      return res.status(400).json({ 
+        message: 'Please fill all required fields',
+        missingFields,
+        receivedData: { firstName, lastName, email, userType }
+      });
     }
 
     // Check if user exists
@@ -23,20 +38,23 @@ router.post('/register', async (req, res) => {
 
     // Create new user
     const user = new User({
-      firstName,
-      lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: normalizedEmail,
-      password,
+      password: password.trim(),
       userType: userType || 'buyer'
     });
 
     await user.save();
 
-    // Send welcome email
-    const welcomeResult = await sendWelcomeEmail(email, firstName);
-    if (!welcomeResult.success) {
-      console.warn(`Welcome email failed for ${email}: ${welcomeResult.error || 'Unknown error'}`);
-    }
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(normalizedEmail, firstName).then(result => {
+      if (!result.success) {
+        console.warn(`Welcome email failed for ${normalizedEmail}: ${result.error || 'Unknown error'}`);
+      }
+    }).catch(err => {
+      console.error(`Welcome email error for ${normalizedEmail}:`, err);
+    });
 
     // Create JWT token
     const token = jwt.sign(
@@ -44,6 +62,8 @@ router.post('/register', async (req, res) => {
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '7d' }
     );
+
+    console.log(`User registered successfully: ${normalizedEmail}`);
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -57,10 +77,15 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     if (error.code === 11000) {
       return res.status(400).json({ message: 'User already exists' });
     }
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ message: 'Validation failed', details: messages });
+    }
+    res.status(500).json({ message: error.message, error: process.env.NODE_ENV === 'development' ? error.stack : undefined });
   }
 });
 

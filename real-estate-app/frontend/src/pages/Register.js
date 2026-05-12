@@ -22,15 +22,40 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
+    // Client-side validation
+    if (!formData.firstName.trim()) {
+      setError('First name is required');
+      return;
+    }
+    if (!formData.lastName.trim()) {
+      setError('Last name is required');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (!formData.password.trim()) {
+      setError('Password is required');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+
     try {
+      console.log('Submitting registration:', { ...formData, password: '***' });
       const response = await api.post('/api/auth/register', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/');
     } catch (err) {
+      console.error('Registration error:', err.response?.data);
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
