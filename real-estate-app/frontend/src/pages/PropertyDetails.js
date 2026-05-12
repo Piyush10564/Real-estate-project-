@@ -134,7 +134,17 @@ function PropertyDetails() {
 
   if (loading || !property) return <div className="loading">Loading property details...</div>;
 
-  const imageUrl = property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/600x400';
+  const normalizeImageUrl = (url) => {
+    if (!url) return url;
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http://')) {
+      return url.replace(/^http:\/\//i, 'https://');
+    }
+    return url;
+  };
+
+  const imageUrl = property.images && property.images.length > 0
+    ? normalizeImageUrl(property.images[0])
+    : 'https://via.placeholder.com/600x400';
   const sellerAvatarUrl =
     property.seller?.profileImage ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(`${property.seller?.firstName || 'S'} ${property.seller?.lastName || 'eller'}`)}&background=2f261f&color=f7f2eb&size=128`;

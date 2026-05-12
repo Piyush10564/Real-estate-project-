@@ -35,10 +35,16 @@ const upload = multer({
   }
 });
 
+const getPublicBaseUrl = (req) => {
+  const forwardedProto = (req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  return `${protocol}://${req.get('host')}`;
+};
+
 // Upload property images
 router.post('/upload-images', authMiddleware, upload.array('images', 10), async (req, res) => {
   try {
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = getPublicBaseUrl(req);
     const imageUrls = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
 
     res.json({
@@ -150,7 +156,7 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
     });
     console.log('Files received:', req.files?.length || 0);
     
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = getPublicBaseUrl(req);
     const uploadedImages = (req.files || []).map((file) => `${baseUrl}/uploads/property-images/${file.filename}`);
 
     // Trim string values

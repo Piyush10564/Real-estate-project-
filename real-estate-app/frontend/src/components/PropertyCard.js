@@ -5,6 +5,14 @@ import { formatPriceINR } from '../utils/priceFormatter';
 import '../styles/PropertyCard.css';
 
 function PropertyCard({ property }) {
+  const normalizeImageUrl = (url) => {
+    if (!url) return url;
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http://')) {
+      return url.replace(/^http:\/\//i, 'https://');
+    }
+    return url;
+  };
+
   // Real property images from web sources
   const sampleImages = [
     'https://images.homify.com/v1526467193/p/photo/image/2560934/VILLA_OMAXE.jpg',
@@ -23,7 +31,7 @@ function PropertyCard({ property }) {
   // Use property image or random sample image
   const getImageUrl = () => {
     if (property.images && property.images.length > 0) {
-      return property.images[0];
+      return normalizeImageUrl(property.images[0]);
     }
     // Use a deterministic sample image based on property ID
     const index = (property._id?.charCodeAt(0) || 0) % sampleImages.length;

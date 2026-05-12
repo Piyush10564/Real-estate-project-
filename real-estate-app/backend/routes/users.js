@@ -35,6 +35,12 @@ const upload = multer({
   }
 });
 
+const getPublicBaseUrl = (req) => {
+  const forwardedProto = (req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  return `${protocol}://${req.get('host')}`;
+};
+
 // Get user profile
 router.get('/:id', async (req, res) => {
   try {
@@ -67,7 +73,7 @@ router.put('/:id', authMiddleware, upload.single('profileImage'), async (req, re
     };
 
     if (req.file) {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const baseUrl = getPublicBaseUrl(req);
       updates.profileImage = `${baseUrl}/uploads/profile-images/${req.file.filename}`;
     }
 
