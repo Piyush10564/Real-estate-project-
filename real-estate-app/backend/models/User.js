@@ -35,8 +35,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password') || !this.password) return next();
   try {
-    // Lower rounds from 10 to 8 to reduce CPU time on low-resource hosts (small, deliberate tradeoff)
-    const salt = await bcrypt.genSalt(8);
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) { next(error); }
