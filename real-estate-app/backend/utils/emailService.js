@@ -20,10 +20,7 @@ const createEtherealTransporter = async () => {
       },
     });
 
-    console.log('Ethereal Email Account Created:');
-    console.log('User:', testAccount.user);
-    console.log('Pass:', testAccount.pass);
-    console.log('Web:', 'https://ethereal.email');
+    console.log('Ethereal email account created for development testing.');
 
     return etherealTransporter;
   } catch (error) {
@@ -86,11 +83,9 @@ const getTransporter = async () => {
 
     // Don't verify synchronously - cache it immediately and verify in background
     cachedTransporter = transporter;
-    
-    // Verify in background (non-blocking)
-    transporter.verify().then(() => {
-      console.log('Gmail transporter verified successfully.');
-    }).catch((err) => {
+
+    // Verify in background (non-blocking). Only log failures.
+    transporter.verify().catch((err) => {
       console.warn('Gmail transporter verification failed:', err.message);
     });
 
@@ -99,6 +94,17 @@ const getTransporter = async () => {
 
   // Fallback to Ethereal for development
   console.log('Using Ethereal email service for development...');
+  cachedTransporter = await createEtherealTransporter();
+  return cachedTransporter;
+};
+
+const isGmailAuthError = (error) => {
+  const message = (error && error.message) ? error.message : '';
+  return error && (error.code === 'EAUTH' || /Invalid login|Username and Password not accepted|BadCredentials/i.test(message));
+};
+
+const getFallbackTransporter = async () => {
+  console.log('Falling back to Ethereal email service for development testing.');
   cachedTransporter = await createEtherealTransporter();
   return cachedTransporter;
 };
@@ -161,6 +167,42 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     
     return { success: true, message: 'Password reset email sent successfully' };
   } catch (error) {
+    if (process.env.NODE_ENV !== 'production' && isGmailAuthError(error)) {
+      try {
+        const fallbackTransporter = await getFallbackTransporter();
+        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+
+        const fallbackInfo = await fallbackTransporter.sendMail({
+          from: getSenderEmail(),
+          to: email,
+          subject: 'Password Reset Request - Aggarwal Properties',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0; font-size: 28px;">Password Reset Request</h1>
+              </div>
+
+              <div style="background: #f5f5f5; padding: 30px; border-radius: 0 0 8px 8px;">
+                <p style="color: #333; font-size: 16px; margin-top: 0;">Hello,</p>
+                <p style="color: #666; line-height: 1.6;">We received a request to reset the password for your Aggarwal Properties account.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${resetUrl}" style="display: inline-block; background: #667eea; color: white; padding: 12px 40px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Reset Password</a>
+                </div>
+              </div>
+            </div>
+          `
+        });
+
+        if (fallbackInfo.messageId && nodemailer.getTestMessageUrl) {
+          console.log('📧 Password reset email sent via Ethereal!');
+          console.log('Preview URL:', nodemailer.getTestMessageUrl(fallbackInfo));
+        }
+
+        return { success: true, message: 'Password reset email sent using fallback transporter' };
+      } catch (fallbackError) {
+        console.error('Fallback email sending error:', fallbackError);
+      }
+    }
     console.error('Email sending error:', error);
     return { success: false, error: error.message };
   }
@@ -245,6 +287,41 @@ const sendWelcomeEmail = async (email, firstName) => {
     
     return { success: true };
   } catch (error) {
+    if (process.env.NODE_ENV !== 'production' && isGmailAuthError(error)) {
+      try {
+        const fallbackTransporter = await getFallbackTransporter();
+        const fallbackInfo = await fallbackTransporter.sendMail({
+          from: getSenderEmail(),
+          to: email,
+          subject: 'Welcome to Aggarwal Properties! 🎉',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0; font-size: 32px;">Welcome to Aggarwal Properties</h1>
+                <p style="margin: 10px 0 0 0; font-size: 14px; color: #b8860b;">Your trusted real estate partner</p>
+              </div>
+
+              <div style="background: #f5f5f5; padding: 40px; border-radius: 0 0 8px 8px;">
+                <p style="color: #333; font-size: 16px; margin-top: 0;">Hello ${firstName},</p>
+                <p style="color: #666; line-height: 1.8; font-size: 15px;">Thank you for registering with <strong>Aggarwal Properties</strong>!</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Explore Properties</a>
+                </div>
+              </div>
+            </div>
+          `
+        });
+
+        if (fallbackInfo.messageId && nodemailer.getTestMessageUrl) {
+          console.log('📧 Welcome email sent via Ethereal!');
+          console.log('Preview URL:', nodemailer.getTestMessageUrl(fallbackInfo));
+        }
+
+        return { success: true };
+      } catch (fallbackError) {
+        console.error('Fallback email sending error:', fallbackError);
+      }
+    }
     console.error('Email sending error:', error);
     return { success: false, error: error.message };
   }
